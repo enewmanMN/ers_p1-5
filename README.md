@@ -9,3 +9,6 @@ The Expense Reimbursement System (ERS) will manage the process of reimbursing em
 - Replace JDBC logic with Hibernate
 - Create custom exceptions to replace generic RuntimeException instances
 - Achieve <80% unit test coverage of service classes
+
+## Docs
+https://docs.google.com/document/d/1a8xoQ4vBYrwAbNLNN10U47VOeQAZPuhiiivBbLAWEC4/edit?usp=sharing
