@@ -16,8 +16,8 @@ import java.util.Objects;
 public class User {
 
     @Id
-    @GeneratedValue(generator = "increment")
-    @GenericGenerator(name="increment", strategy="increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int userId;
 
     @Column(name = "username", length = 25, unique = true)
@@ -34,10 +34,11 @@ public class User {
 
     @Column(name = "email", length = 256, unique = true)
     private String email;
-
-    @ManyToOne(targetEntity = Role.class)
-    @JoinColumn(name = "user_role_id")
-    @Enumerated(EnumType.ORDINAL)
+//
+//    @ManyToOne(targetEntity = Role.class)
+//    @JoinColumn(name = "user_role_id")
+//    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "user_role_id")
     private Integer userRole;
 
     public User() {

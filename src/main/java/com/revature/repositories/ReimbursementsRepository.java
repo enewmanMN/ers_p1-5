@@ -435,8 +435,8 @@ public class ReimbursementsRepository {
             temp.setSubmitted(rs.getTimestamp("submitted"));
             temp.setResolved(rs.getTimestamp("resolved"));
             temp.setDescription(rs.getString("description"));
-            temp.setAuthorId(rs.getInt("author_id"));
-            temp.setResolverId(rs.getInt("resolver_id"));
+//            temp.setAuthorId(rs.getInt("author_id"));
+//            temp.setResolverId(rs.getInt("resolver_id"));
             temp.setReimbursementStatus(ReimbursementStatus.getByNumber(rs.getInt("reimbursement_status_id")));
             temp.setReimbursementType(ReimbursementType.getByNumber(rs.getInt("reimbursement_type_id")));
 

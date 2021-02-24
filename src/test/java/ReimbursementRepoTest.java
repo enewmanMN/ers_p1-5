@@ -24,18 +24,18 @@ public class ReimbursementRepoTest {
 
     @BeforeEach
     public void setUp() {
-        //set up the user we can try to add to the db
-//        eric = new User();
-//        eric.setEmail("erics@email");
-//        eric.setFirstname("Eric");
-//        eric.setLastname("Newman");
-//        eric.setUsername("enewman");
-//        eric.setUserId(1);
-//        eric.setUserRole(1);
-//        eric.setPassword("Packers1");
-//
-//        //initialize the userservice that actually does the act of registering and such
-//        userService = new UserService();
+//        set up the user we can try to add to the db
+        eric = new User();
+        eric.setEmail("erics@email");
+        eric.setFirstname("Eric");
+        eric.setLastname("Newman");
+        eric.setUsername("enewman");
+        eric.setUserId(1);
+        eric.setUserRole(1);
+        eric.setPassword("Packers1");
+
+        //initialize the userservice that actually does the act of registering and such
+        userService = new UserService();
 
 
         repo = new ReimbursementsRepository();
@@ -43,10 +43,10 @@ public class ReimbursementRepoTest {
         reim = new Reimbursement();
         reim.setAmount(20.21);
         reim.setReimbursementType(ReimbursementType.FOOD);
-        reim.setAuthorId(4);
+        reim.setAuthorId(eric);
         reim.setDescription("keflklkef");
         reim.setResolved(new Timestamp(System.currentTimeMillis()));
-        reim.setResolverId(4);
+        reim.setResolverId(eric);
         reim.setReimbursementStatus(ReimbursementStatus.PENDING);
         reim.setSubmitted(new Timestamp(System.currentTimeMillis()));
 
