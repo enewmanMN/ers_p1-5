@@ -19,8 +19,8 @@ public class Reimbursement {
 
 
     @Id
-    @GeneratedValue(generator = "increment")
-    @GenericGenerator(name="increment", strategy="increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
     @Column(name = "amount")
@@ -54,13 +54,13 @@ public class Reimbursement {
 //    @ManyToOne(targetEntity = User.class)
 //    @JoinColumn(name = "ID", insertable = false, updatable = false)
 //    @Enumerated(EnumType.STRING)
-    @Column(name = "reimb_status")
+    @Column(name = "id")
     private ReimbursementStatus reimbursementStatus;
 
 //    @ManyToOne(targetEntity = User.class)
 //    @JoinColumn(name = "ID")
 //    @Enumerated(EnumType.STRING)
-    @Column(name = "reimb_type")
+    @Column(name = "reimbursement_type_id")
     private ReimbursementType reimbursementType;
 
     public Reimbursement() {
