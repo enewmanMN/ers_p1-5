@@ -2,6 +2,7 @@ package com.revature.models;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.ManyToAny;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.File;
@@ -34,8 +35,9 @@ public class Reimbursement {
     @Column(name = "description")
     private String description;
 
-
-    private File receipt;
+    @Type(type="org.hibernate.type.BinaryType")
+    @Column(name = "receipt", columnDefinition = "bytea")
+    private Byte[] receipt;
 
     @Column(name = "author_id")
     private int authorId;
@@ -90,11 +92,11 @@ public class Reimbursement {
         this.reimbursementType = reimbursementType;
     }
 
-    public File getReceipt() {
+    public Byte[] getReceipt() {
         return receipt;
     }
 
-    public void setReceipt(File receipt) {
+    public void setReceipt(Byte[] receipt) {
         this.receipt = receipt;
     }
 

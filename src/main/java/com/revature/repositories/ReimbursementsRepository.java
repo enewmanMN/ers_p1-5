@@ -5,7 +5,9 @@ import com.revature.models.Reimbursement;
 import com.revature.models.ReimbursementStatus;
 import com.revature.models.ReimbursementType;
 import com.revature.util.ConnectionFactory;
+import com.revature.util.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,8 +48,16 @@ public class ReimbursementsRepository {
     // TODO add support to persist receipt images to data source
     public boolean addReimbursement(Reimbursement reimbursement) {
 
-        Session session;
+        boolean result= true;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
+        session.beginTransaction();
+
+        session.save(reimbursement);
+        session.getTransaction().commit();
+
+        HibernateUtil.shutdown();
 
 //        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
 //            String sql = baseInsert +
