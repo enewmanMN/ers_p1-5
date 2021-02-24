@@ -54,7 +54,7 @@ public class Reimbursement {
 //    @ManyToOne(targetEntity = User.class)
 //    @JoinColumn(name = "ID", insertable = false, updatable = false)
 //    @Enumerated(EnumType.STRING)
-    @Column(name = "id")
+    @Column(name = "reimbursement_status_id")
     private ReimbursementStatus reimbursementStatus;
 
 //    @ManyToOne(targetEntity = User.class)
