@@ -16,17 +16,27 @@ public class ConnectionFactory {
     private Properties props = new Properties();
     private static ConnectionFactory connFactory = new ConnectionFactory();
 
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private ConnectionFactory(){
         try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream propsInput = loader.getResourceAsStream("application.properties");
-            if (propsInput == null) {
-                props.setProperty("url", System.getProperty("url"));
-                props.setProperty("username", System.getProperty("username"));
-                props.setProperty("password", System.getProperty("password"));
-            } else {
-                props.load(propsInput);
-            }
+            props.load(new FileReader("src/main/resources/application.properties"));
+//            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//            InputStream propsInput = loader.getResourceAsStream("src/main/resources/application.properties");
+//            if (propsInput == null) {
+//                props.setProperty("url", System.getProperty("url"));
+//                props.setProperty("username", System.getProperty("username"));
+//                props.setProperty("password", System.getProperty("password"));
+//            } else {
+//                props.load(propsInput);
+//            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -49,11 +59,12 @@ public class ConnectionFactory {
         Connection conn = null;
         try {
             // Force the JVM to load the PostGreSQL JDBC driver
-            Class.forName("org.postgresql.Driver");
-            conn = DriverManager.getConnection(props.getProperty("url"),
-                    props.getProperty("username"),
-                    props.getProperty("password"));
-        } catch (ClassNotFoundException | SQLException e) {
+            //Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection(
+                    props.getProperty("url"),
+                    props.getProperty("admin-usr"),
+                    props.getProperty("admin-pw"));
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         if (conn == null) {
