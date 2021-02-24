@@ -156,6 +156,7 @@ public class UserRepository {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, userId);
             //get the number of affected rows
+            System.out.println("[INFO] UserRepository.deleteAUserById - prepared statement: " + ps.toString());
             int rowsInserted = ps.executeUpdate();
             return rowsInserted != 0;
         } catch (SQLException e) {
@@ -164,6 +165,29 @@ public class UserRepository {
         return false;
     }
 
+
+    /**
+     * A method to delete a single User from the database
+     * @param username string of username you are trying to delete
+     * @return returns true if one and only one record is updated
+     * @throws SQLException
+     */
+    public boolean deleteByUsername(String username) {
+        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            String deleteSql = "DELETE FROM " +
+                    "project_1.ers_users where username=?";
+
+            PreparedStatement ps = conn.prepareStatement(deleteSql);
+            ps.setString(1, username);
+            //get the number of affected rows
+            System.out.println("[INFO] UserRepository.deleteAUserById - prepared statement: " + ps.toString());
+            int rowsInserted = ps.executeUpdate();
+            return rowsInserted == 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
     //---------------------------------- UTIL -------------------------------------------- //

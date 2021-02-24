@@ -86,6 +86,18 @@ public class UserService {
     }
 
     /**
+     * ACTUALLY REMOVES ENTRY FROM DATABASE - UNLIKE DELETEBYID
+     * @param username of user to delete
+     * @return true if role was updated in db
+     */
+    public boolean deleteByUsername(String username) {
+        if (username.equals(null)){
+            throw new RuntimeException("THE PROVIDED ID CANNOT BE LESS THAN OR EQUAL TO ZERO");
+        }
+        return userRepo.deleteByUsername(username);
+    }
+
+    /**
      * Method for simple checking of availability of username
      * @param username username to chek
      * @return true if available
