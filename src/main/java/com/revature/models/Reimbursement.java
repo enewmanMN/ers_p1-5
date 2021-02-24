@@ -1,5 +1,9 @@
 package com.revature.models;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.ManyToAny;
+
+import javax.persistence.*;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -7,16 +11,46 @@ import java.util.Objects;
 /**
  * The base unit of the ERS system. ready to include images
  */
+@Entity
+@Table(name = "ers_reimbursements")
 public class Reimbursement {
+
+    @Id
+    @GeneratedValue(generator = "increment")
+    @GenericGenerator(name="increment", strategy="increment")
     private Integer id;
+
+    @Column(name = "amount")
     private Double amount;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "submitted")
     private Timestamp submitted;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "resolved")
     private Timestamp resolved;
+
+    @Column(name = "description")
     private String description;
+
+
     private File receipt;
+
+    @Column(name = "author_id")
     private int authorId;
+
+    @Column(name = "resolver_id")
     private int resolverId;
+
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "ID")
+    @Enumerated(EnumType.STRING)
     private ReimbursementStatus reimbursementStatus;
+
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "ID")
+    @Enumerated(EnumType.STRING)
     private ReimbursementType reimbursementType;
 
     public Reimbursement() {
