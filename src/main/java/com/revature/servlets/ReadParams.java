@@ -10,6 +10,7 @@ import java.util.*;
 public class ReadParams extends HttpServlet {
 
     // Method to handle GET method request.
+    // Carries request parameters in appended url string so less secure
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -58,7 +59,7 @@ public class ReadParams extends HttpServlet {
             }
         }
         out.println("</tr>\n</table>\n" +
-                "<form action = \"HelloForm\" method = \"GET\">\n" +
+                "<form action = \"read\" method = \"POST\">\n" +
                 "    Username: <input type = \"text\" name = \"first_name\">\n" +
                 "    <br />\n" +
                 "    Password: <input type = \"text\" name = \"last_name\" />\n" +
@@ -66,7 +67,8 @@ public class ReadParams extends HttpServlet {
                 "</form></body></html>");
     }
 
-    // Method to handle POST method request.
+    // Method to handle POST method request. - more secure way of sending data from client to server
+    // -Carries request paramaters in message body
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
