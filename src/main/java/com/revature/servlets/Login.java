@@ -1,5 +1,8 @@
 package com.revature.servlets;
 
+import com.revature.models.User;
+import com.revature.services.UserService;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,73 +18,45 @@ public class Login extends HttpServlet {
     // Carries request parameters in appended url string so less secure
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        PrintWriter out = response.getWriter();
+        out.println("" +
+                "<html>\n" +
+                "    <head>\n" +
+                "        <title>Login</title>\n" +
+                "    </head>\n" +
+                "    <body>\n" +
+                "        <form method=\"post\" action=\"login\">\n" +
+                "                Email ID:<input type=\"text\" name=\"username\" /><br/>\n" +
+                "                Password:<input type=\"text\" name=\"password\" /><br/>\n" +
+                "        <input type=\"submit\" value=\"login\" />\n" +
+                "        </form>\n" +
+                "    </body>\n" +
+                "</html>" +
+                "");
 
-        //should just list out the login form and send the input to dopost here
-        RequestDispatcher view = request.getRequestDispatcher("/src/main/webapp/index.html");
-        view.forward(request, response);
-//
-//
-//
-//        // Set response content type
-//        response.setContentType("text/html");
-//
-//        PrintWriter out = response.getWriter();
-//        String title = "Reading All Form Parameters";
-//        String docType =
-//                "<!doctype html public \"-//w3c//dtd html 4.0 " + "transitional//en\">\n";
-//
-//        out.println(docType +
-//                "<html>\n" +
-//                "<head><title>" + title + "</title></head>\n" +
-//                "<body bgcolor = \"#f0f0f0\">\n" +
-//                "<h1 align = \"center\">" + title + "</h1>\n" +
-//                "<table width = \"100%\" border = \"1\" align = \"center\">\n" +
-//                "<tr bgcolor = \"#949494\">\n" +
-//                "<th>Param Name</th>" +
-//                "<th>Param Value(s)</th>\n"+
-//                "</tr>\n"
-//        );
-//
-//        Enumeration paramNames = request.getParameterNames();
-//
-//        while(paramNames.hasMoreElements()) {
-//            String paramName = (String)paramNames.nextElement();
-//            out.print("<tr><td>" + paramName + "</td>\n<td>");
-//            String[] paramValues = request.getParameterValues(paramName);
-//
-//            // Read single valued data
-//            if (paramValues.length == 1) {
-//                String paramValue = paramValues[0];
-//                if (paramValue.length() == 0)
-//                    out.println("<i>No Value</i>");
-//                else
-//                    out.println(paramValue);
-//            } else {
-//                // Read multiple valued data
-//                out.println("<ul>");
-//
-//                for(int i = 0; i < paramValues.length; i++) {
-//                    out.println("<li>" + paramValues[i]);
-//                }
-//                out.println("</ul>");
-//            }
-//        }
-//        //"/read ? first_name (user value) : last_name (uservalue)"
-//        out.println("</tr>\n</table>\n" +
-//                "<form action = \"read\" method = \"POST\">\n" +
-//                "    Username: <input type = \"text\" name = \"first_name\">\n" +
-//                "    <br />\n" +
-//                "    Password: <input type = \"text\" name = \"last_name\" />\n" +
-//                "    <input type = \"submit\" value = \"Submit\" />\n" +
-//                "</form></body></html>");
     }
 
     // Method to handle POST method request. - more secure way of sending data from client to server
     // -Carries request paramaters in message body
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        UserService userService = new UserService();
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
 
-        //actually go through the response from the get request form returned by the user?
-        doGet(request, response);
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        User user = userService.authenticate(username, password);
+        if (userService.isUserValid(user)) {
+            RequestDispatcher rs = request.getRequestDispatcher("Welcome");
+            rs.forward(request, response);
+        }
+        else
+        {
+            out.println("Username or Password incorrect");
+            RequestDispatcher rs = request.getRequestDispatcher("index.html");
+            rs.include(request, response);
+        }
     }
 }
