@@ -40,7 +40,7 @@ public class Reimbursement {
     private String description;
 
     @Type(type="org.hibernate.type.BinaryType")
-    @Column(name = "receipt", columnDefinition = "bytea")
+    @Column(name = "reciept", columnDefinition = "bytea")
     private Byte[] receipt;
 
     @ManyToOne(targetEntity = User.class)

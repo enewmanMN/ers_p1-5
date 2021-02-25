@@ -47,7 +47,7 @@ public class ReimbursementRepoTest {
         reim.setDescription("keflklkef");//
         reim.setResolved(new Timestamp(System.currentTimeMillis()));//
         reim.setResolverId(eric);
-        reim.setReimbursementStatus(ReimbursementStatus.PENDING);//
+        reim.setReimbursementStatus(ReimbursementStatus.APPROVED);//
         reim.setSubmitted(new Timestamp(System.currentTimeMillis()));//
         reim.setReceipt(null);//
 

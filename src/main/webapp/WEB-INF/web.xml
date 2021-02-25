@@ -20,4 +20,16 @@
         <url-pattern>/test</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>ReadParams</servlet-name>
+        <servlet-class>com.revature.servlets.ReadParams</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReadParams</servlet-name>
+        <url-pattern>/read</url-pattern>
+    </servlet-mapping>
+
+
+
 </web-app>
