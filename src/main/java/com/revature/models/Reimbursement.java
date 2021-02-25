@@ -1,29 +1,73 @@
 package com.revature.models;
 
-import java.io.File;
+import org.hibernate.annotations.*;
+
+import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
+
 
 /**
  * The base unit of the ERS system. ready to include images
  */
+@Entity
+@Table(name = "ers_reimbursements", schema = "project_1")
 public class Reimbursement {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
+
+    @Column(name = "amount")
     private Double amount;
-    private Timestamp submitted;
-    private Timestamp resolved;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "submitted")
+    private java.util.Date submitted;
+    //private Timestamp submitted;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "resolved")
+    private java.util.Date resolved;
+    //private Timestamp resolved;
+
+    @Column(name = "description")
     private String description;
-    private File receipt;
-    private int authorId;
-    private int resolverId;
+
+    @Type(type="org.hibernate.type.BinaryType")
+    @Column(name = "receipt", columnDefinition = "bytea")
+    private Byte[] receipt;
+
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "author_id")
+    private User authorId;
+
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "resolver_id", insertable = false, updatable = false)
+    private User resolverId;
+
+//    @ManyToOne(targetEntity = User.class)
+//    @JoinColumn(name = "ID", insertable = false, updatable = false)
+//    @Enumerated(EnumType.STRING)
+    @Column(name = "reimbursement_status_id")
     private ReimbursementStatus reimbursementStatus;
+
+//    @ManyToOne(targetEntity = User.class)
+//    @JoinColumn(name = "ID")
+//    @Enumerated(EnumType.STRING)
+    @Column(name = "reimbursement_type_id")
     private ReimbursementType reimbursementType;
 
     public Reimbursement() {
         super();
     }
 
-    public Reimbursement(Double amount, String description, int authorId,
+    public Reimbursement(Double amount, String description, User authorId,
                          ReimbursementStatus reimbursementStatus, ReimbursementType reimbursementType) {
         this.amount = amount;
         this.description = description;
@@ -32,7 +76,7 @@ public class Reimbursement {
         this.reimbursementType = reimbursementType;
     }
 
-    public Reimbursement(Integer id, Double amount, String description, int authorId,
+    public Reimbursement(Integer id, Double amount, String description, User authorId,
                          ReimbursementStatus reimbursementStatus, ReimbursementType reimbursementType) {
         this.id = id;
         this.amount = amount;
@@ -43,7 +87,7 @@ public class Reimbursement {
     }
 
     public Reimbursement(Integer id, Double amount, Timestamp submitted,
-                         Timestamp resolved, String description, int authorId, int resolverId,
+                         Timestamp resolved, String description, User authorId, User resolverId,
                          ReimbursementStatus reimbursementStatus, ReimbursementType reimbursementType) {
         this.id = id;
         this.amount = amount;
@@ -56,11 +100,11 @@ public class Reimbursement {
         this.reimbursementType = reimbursementType;
     }
 
-    public File getReceipt() {
+    public Byte[] getReceipt() {
         return receipt;
     }
 
-    public void setReceipt(File receipt) {
+    public void setReceipt(Byte[] receipt) {
         this.receipt = receipt;
     }
 
@@ -80,17 +124,17 @@ public class Reimbursement {
         this.amount = amount;
     }
 
-    public Timestamp getSubmitted() {
-        return submitted;
-    }
+//    public Timestamp getSubmitted() {
+//        return submitted;
+//    }
 
     public void setSubmitted(Timestamp submitted) {
         this.submitted = submitted;
     }
 
-    public Timestamp getResolved() {
-        return resolved;
-    }
+//    public Timestamp getResolved() {
+//        return resolved;
+//    }
 
     public void setResolved(Timestamp resolved) {
         this.resolved = resolved;
@@ -104,24 +148,40 @@ public class Reimbursement {
         this.description = description;
     }
 
-    public int getAuthorId() {
+    public ReimbursementStatus getReimbursementStatus() {
+        return reimbursementStatus;
+    }
+
+    public Date getSubmitted() {
+        return submitted;
+    }
+
+    public void setSubmitted(Date submitted) {
+        this.submitted = submitted;
+    }
+
+    public Date getResolved() {
+        return resolved;
+    }
+
+    public void setResolved(Date resolved) {
+        this.resolved = resolved;
+    }
+
+    public User getAuthorId() {
         return authorId;
     }
 
-    public void setAuthorId(int authorId) {
+    public void setAuthorId(User authorId) {
         this.authorId = authorId;
     }
 
-    public int getResolverId() {
+    public User getResolverId() {
         return resolverId;
     }
 
-    public void setResolverId(int resolverId) {
+    public void setResolverId(User resolverId) {
         this.resolverId = resolverId;
-    }
-
-    public ReimbursementStatus getReimbursementStatus() {
-        return reimbursementStatus;
     }
 
     public void setReimbursementStatus(ReimbursementStatus reimbursementStatus) {

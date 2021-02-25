@@ -1,0 +1,26 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd" >
+<hibernate-configuration>
+    <session-factory>
+        <!-- JDBC Database connection settings -->
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="connection.url">jdbc:postgresql://java-210119.csk6bcoej1jm.us-east-2.rds.amazonaws.com:5432/demo</property>
+        <property name="connection.username">postgres</property>
+        <property name="connection.password">Blackiceice123</property>
+        <!-- JDBC connection pool settings ... using built-in test pool -->
+        <property name="connection.pool_size">1</property>
+        <!-- Select our SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.PostgreSQL9Dialect</property>
+        <!-- Echo the SQL to stdout -->
+        <property name="show_sql">true</property>
+        <!-- Set the current session context -->
+        <property name="current_session_context_class">thread</property>
+        <!-- Drop and re-create the database schema on startup -->
+
+        <!-- dbcp connection pool configuration -->
+        <property name="hibernate.generate_statistics">true</property>
+        <mapping class="com.revature.models.Reimbursement" />
+        <mapping class="com.revature.models.User" />
+        </session-factory>
+        </hibernate-configuration>
