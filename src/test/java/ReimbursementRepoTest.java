@@ -41,14 +41,15 @@ public class ReimbursementRepoTest {
         repo = new ReimbursementsRepository();
 
         reim = new Reimbursement();
-        reim.setAmount(20.21);
-        reim.setReimbursementType(ReimbursementType.FOOD);
-        reim.setAuthorId(eric);
-        reim.setDescription("keflklkef");
-        reim.setResolved(new Timestamp(System.currentTimeMillis()));
+        reim.setAmount(20.21);//
+        reim.setReimbursementType(ReimbursementType.FOOD);//
+        reim.setAuthorId(eric);//
+        reim.setDescription("keflklkef");//
+        reim.setResolved(new Timestamp(System.currentTimeMillis()));//
         reim.setResolverId(eric);
-        reim.setReimbursementStatus(ReimbursementStatus.PENDING);
-        reim.setSubmitted(new Timestamp(System.currentTimeMillis()));
+        reim.setReimbursementStatus(ReimbursementStatus.PENDING);//
+        reim.setSubmitted(new Timestamp(System.currentTimeMillis()));//
+        reim.setReceipt(null);//
 
     }
 

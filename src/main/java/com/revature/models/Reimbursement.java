@@ -14,7 +14,7 @@ import java.util.Objects;
  * The base unit of the ERS system. ready to include images
  */
 @Entity
-@Table(name = "ers_reimbursements")
+@Table(name = "ers_reimbursements", schema = "project_1")
 public class Reimbursement {
 
 

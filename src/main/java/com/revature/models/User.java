@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 
 @Entity
-@Table( name = "ers_users" )
+@Table( name = "ers_users", schema = "project_1")
 public class User {
 
     @Id
