@@ -153,6 +153,7 @@ public class UserRepository {
     }
 
     public Optional<User> getAUserByUsername(String userName) {
+
         Optional<User> user = Optional.empty();
         try (Connection conn = ConnectionFactory.getInstance().getConnection()){
             String sql = baseQuery + "WHERE username = ?";
@@ -169,25 +170,63 @@ public class UserRepository {
 
     /**
      * A method to get a single user by a given username and password
-     * @param userName the users username
+     * @param username the users username
      * @param password the users password
      * @return returns an optional user
      * @throws SQLException e
      */
-    public Optional<User> getAUserByUsernameAndPassword(String userName, String password) {
-        Optional<User> user = Optional.empty();
-        try (Connection conn = ConnectionFactory.getInstance().getRemoteConnection()){
-            String sql = baseQuery + "WHERE username = ? AND  password = project_1.crypt(?, password)";
-            PreparedStatement psmt = conn.prepareStatement(sql);
-            psmt.setString(1,userName);
-            psmt.setString(2,password);
-            ResultSet rs = psmt.executeQuery();
-            user = mapResultSet(rs).stream().findFirst();
-        } catch (SQLException sqle) {
-            sqle.printStackTrace();
+    public Optional<User> getAUserByUsernameAndPassword(String username, String password) {
+
+        List users = null;
+        User user = null;
+
+        Transaction tx = null;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+            tx = session.beginTransaction();
+
+            String hql = "FROM User u WHERE u.username = :username and u.password = :password";
+            Query query = session.createQuery(hql);
+            query.setParameter("username", username);
+            query.setParameter("password", password);
+
+            users = query.list();
+
+
+            System.out.println(users.toString());
+
+            if(!users.isEmpty())
+                user = (User) users.get(0);
+
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
-        System.out.println(user);
-        return user;
+
+        if(user != null) {
+            return Optional.of(user);
+        }
+        else{
+            return Optional.empty();
+        }
+
+//        Optional<User> user = Optional.empty();
+//        try (Connection conn = ConnectionFactory.getInstance().getRemoteConnection()){
+//            String sql = baseQuery + "WHERE username = ? AND  password = project_1.crypt(?, password)";
+//            PreparedStatement psmt = conn.prepareStatement(sql);
+//            psmt.setString(1,userName);
+//            psmt.setString(2,password);
+//            ResultSet rs = psmt.executeQuery();
+//            user = mapResultSet(rs).stream().findFirst();
+//        } catch (SQLException sqle) {
+//            sqle.printStackTrace();
+//        }
+//        System.out.println(user);
+//        return user;
     }
 
     //---------------------------------- UPDATE -------------------------------------------- //

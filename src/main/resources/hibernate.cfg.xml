@@ -5,9 +5,18 @@
     <session-factory>
         <!-- JDBC Database connection settings -->
         <property name="connection.driver_class">org.postgresql.Driver</property>
-        <property name="connection.url">jdbc:postgresql://revaturedb.cqu0vx8vy1y0.us-east-2.rds.amazonaws.com:5432/mydb</property>
-        <property name="connection.username">enewman10</property>
-        <property name="connection.password">Packers1!</property>
+
+        <property name="connection.url">
+            {$url}
+        </property>
+
+        <property name="connection.username">
+            {$username}
+        </property>
+
+        <property name="connection.password">
+            {$password}
+        </property>
         <!-- JDBC connection pool settings ... using built-in test pool -->
         <property name="connection.pool_size">1</property>
         <!-- Select our SQL dialect -->
