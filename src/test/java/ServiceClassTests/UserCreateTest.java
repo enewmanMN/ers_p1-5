@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserServiceTest {
+public class UserCreateTest {
 
         private User eric;
         private UserService userService;
@@ -25,7 +25,7 @@ public class UserServiceTest {
                 eric.setFirstname("Eric");
                 eric.setLastname("Newman");
                 eric.setUsername("enewman");
-                eric.setUserId(1);
+                //eric.setUserId(1);
                 eric.setUserRole(1);
                 eric.setPassword("Packers1");
 
