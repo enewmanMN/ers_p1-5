@@ -49,7 +49,7 @@ public class Login extends HttpServlet {
 
         User user = userService.authenticate(username, password);
         if (userService.isUserValid(user)) {
-            RequestDispatcher rs = request.getRequestDispatcher("Welcome");
+            RequestDispatcher rs = request.getRequestDispatcher("headers");
             rs.forward(request, response);
         }
         else
