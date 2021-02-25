@@ -58,7 +58,7 @@ public class ReadParams extends HttpServlet {
                 out.println("</ul>");
             }
         }
-        "/read ? first_name (user value) : last_name (uservalue)"
+        //"/read ? first_name (user value) : last_name (uservalue)"
         out.println("</tr>\n</table>\n" +
                 "<form action = \"read\" method = \"POST\">\n" +
                 "    Username: <input type = \"text\" name = \"first_name\">\n" +
