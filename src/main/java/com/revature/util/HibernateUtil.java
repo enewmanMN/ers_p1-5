@@ -1,29 +1,36 @@
 package com.revature.util;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.Metadata;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
 import java.io.File;
 
 public class HibernateUtil
 {
-    private static SessionFactory sessionFactory = buildSessionFactory();
+    private static final SessionFactory sessionFactory = buildSessionFactory();
 
     private static SessionFactory buildSessionFactory()
     {
         try
         {
-            if (sessionFactory == null) {
-                StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder().configure("hibernate.cfg.xml").build();
-                Metadata metaData = new MetadataSources(standardRegistry).getMetadataBuilder().build();
-                sessionFactory = metaData.getSessionFactoryBuilder().build();
-            }
+//            try
+//            {
+//                if (sessionFactory == null) {
+//                    StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder().configure("hibernate.cfg.xml").build();
+//                    Metadata metaData = new MetadataSources(standardRegistry).getMetadataBuilder().build();
+//                    sessionFactory = metaData.getSessionFactoryBuilder().build();
+//                }
+//                // Create the SessionFactory from hibernate.cfg.xml
+//                return sessionFactory;
+//            }
             // Create the SessionFactory from hibernate.cfg.xml
-            return sessionFactory;
+            try {
+                //if on the web
+                return new Configuration().configure(new File("webapps/test/WEB-INF/classes/hibernate.cfg.xml")).buildSessionFactory();
+            } catch (Exception e) {
+                return new Configuration().configure(new File("src/main/resources/hibernate.cfg.xml")).buildSessionFactory();
+            }
+
         }
 
         catch (Throwable ex) {

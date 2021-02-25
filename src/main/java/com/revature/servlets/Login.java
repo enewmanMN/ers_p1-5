@@ -43,14 +43,12 @@ public class Login extends HttpServlet {
         UserService userService = new UserService();
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
         User user = userService.authenticate(username, password);
         if (userService.isUserValid(user)) {
-            RequestDispatcher rs = request.getRequestDispatcher("headers");
-            rs.forward(request, response);
+            out.write("<h1>/Login credentials valid</h1>");
         }
         else
         {

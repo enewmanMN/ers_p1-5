@@ -59,6 +59,8 @@
                     <configuration>
                         <url>http://localhost:8080/manager/text</url>
                         <server>LocalTomcat</server>
+                        <username>admin</username>
+                        <password>revature</password>
                         <path>/test</path>
                     </configuration>
                 </plugin>

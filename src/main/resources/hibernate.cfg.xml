@@ -8,15 +8,15 @@
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
 
         <property name="hibernate.connection.url">
-            {$url}
+            jdbc:postgresql://revaturedb.cqu0vx8vy1y0.us-east-2.rds.amazonaws.com:5432/mydb
         </property>
 
         <property name="hibernate.connection.username">
-            {$username}
+            enewman10
         </property>
 
         <property name="hibernate.connection.password">
-            {$password}
+            Packers1!
         </property>
         <!-- JDBC connection pool settings ... using built-in test pool -->
 <!--        <property name="connection.pool_size">1</property>-->
