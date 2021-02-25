@@ -49,4 +49,15 @@ public class UserRepoTest {
 //            System.out.println(user);
 //        }
 //    }
+
+    @Test
+    @DisplayName("Check a user by finding their email Test")
+    public void getUserByEmailTest(){
+
+        String email = "test@email";
+        boolean user = userService.isEmailAvailable(email);
+
+        System.out.println(user);
+
+    }
 }

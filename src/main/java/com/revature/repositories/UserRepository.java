@@ -105,6 +105,7 @@ public class UserRepository {
     public Optional<User> getAUserByEmail(String email) {
 
         List users = null;
+        User user = null;
 
         Transaction tx = null;
 
@@ -117,6 +118,12 @@ public class UserRepository {
             Query query = session.createQuery(hql);
             query.setParameter("email", email);
             users = query.list();
+
+
+            System.out.println(users.toString());
+
+            if(!users.isEmpty())
+                user = (User) users.get(0);
 
         }catch (HibernateException e) {
             if(tx != null) tx.rollback();
@@ -135,7 +142,14 @@ public class UserRepository {
 //        } catch (SQLException e) {
 //            e.printStackTrace();
 //        }
-        return users;
+
+        if(user != null) {
+            return Optional.of(user);
+        }
+        else{
+            return Optional.empty();
+        }
+
     }
 
     public Optional<User> getAUserByUsername(String userName) {
