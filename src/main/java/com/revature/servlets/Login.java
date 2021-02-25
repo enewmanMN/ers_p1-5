@@ -17,7 +17,7 @@ public class Login extends HttpServlet {
             throws ServletException, IOException {
 
         //should just list out the login form and send the input to dopost here
-        RequestDispatcher view = request.getRequestDispatcher("index.html");
+        RequestDispatcher view = request.getRequestDispatcher("/src/main/webapp/index.html");
         view.forward(request, response);
 //
 //
