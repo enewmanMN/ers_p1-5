@@ -73,4 +73,23 @@ public class ConnectionFactory {
         return conn;
     }
 
+    public static Connection getRemoteConnection() {
+        if (System.getenv("RDS_HOSTNAME") != null) {
+            try {
+                Class.forName("org.postgresql.Driver");
+                String dbName = System.getenv("RDS_DB_NAME");
+                String userName = System.getenv("RDS_USERNAME");
+                String password = System.getenv("RDS_PASSWORD");
+                String hostname = System.getenv("RDS_HOSTNAME");
+                String port = System.getenv("RDS_PORT");
+                String jdbcUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName + "?user=" + userName + "&password=" + password;
+                Connection con = DriverManager.getConnection(jdbcUrl);
+                return con;
+            }
+            catch (ClassNotFoundException e) { }
+            catch (SQLException e) { }
+        }
+        return null;
+    }
+
 }
