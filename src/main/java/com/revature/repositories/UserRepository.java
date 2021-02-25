@@ -339,36 +339,59 @@ public class UserRepository {
      * @throws SQLException
      */
     public boolean deleteAUserById(Integer userId) {
-//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-//            String sql = baseUpdate +
-//                         "SET user_role_id=4\n" +
-//                         "WHERE id=? ";
-//            PreparedStatement ps = conn.prepareStatement(sql);
-//            ps.setInt(1, userId);
-//            //get the number of affected rows
-//            int rowsInserted = ps.executeUpdate();
-//            return rowsInserted != 0;
-//        } catch (SQLException e) {
-//            e.printStackTrace();
+        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            String sql = baseUpdate +
+                         "SET user_role_id=4\n" +
+                         "WHERE id=? ";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+            //get the number of affected rows
+            int rowsInserted = ps.executeUpdate();
+            return rowsInserted != 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+//        Session sess = HibernateUtil.getSessionFactory().openSession();
+//        Transaction tx = null;
+//
+//        try {
+//            tx = sess.beginTransaction();
+//            //do some work
+//
+//            tx.commit();
+//        }
+//        catch (Exception e) {
+//            if (tx!=null) tx.rollback();
+//            throw e;
+//        }
+//        finally {
+//            sess.close();
 //        }
 
-        Session sess = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
+        return false;
+    }
 
-        try {
-            tx = sess.beginTransaction();
-            //do some work
+    /**
+     * A method to delete a single User from the database
+     * @param username string of username you are trying to delete
+     * @return returns true if one and only one record is updated
+     * @throws SQLException
+     */
+    public boolean deleteByUsername(String username) {
+        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            String deleteSql = "DELETE FROM " +
+                    "project_1.ers_users where username=?";
 
-            tx.commit();
+            PreparedStatement ps = conn.prepareStatement(deleteSql);
+            ps.setString(1, username);
+            //get the number of affected rows
+            System.out.println("[INFO] UserRepository.deleteAUserById - prepared statement: " + ps.toString());
+            int rowsInserted = ps.executeUpdate();
+            return rowsInserted == 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        catch (Exception e) {
-            if (tx!=null) tx.rollback();
-            throw e;
-        }
-        finally {
-            sess.close();
-        }
-
         return false;
     }
 
