@@ -2,13 +2,14 @@ package com.revature.servlets;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 
-public class Login {
+public class Login extends HttpServlet {
 
     // Method to handle GET method request.
     // Carries request parameters in appended url string so less secure
@@ -80,6 +81,7 @@ public class Login {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        //actually go through the response from the get request form returned by the user?
         doGet(request, response);
     }
 }
