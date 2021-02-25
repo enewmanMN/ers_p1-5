@@ -30,6 +30,16 @@
         <url-pattern>/read</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>ViewHeaders</servlet-name>
+        <servlet-class>com.revature.servlets.DisplayHeader</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ViewHeaders</servlet-name>
+        <url-pattern>/headers</url-pattern>
+    </servlet-mapping>
+
 
 
 </web-app>

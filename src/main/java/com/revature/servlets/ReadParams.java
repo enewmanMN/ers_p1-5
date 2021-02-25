@@ -57,7 +57,13 @@ public class ReadParams extends HttpServlet {
                 out.println("</ul>");
             }
         }
-        out.println("</tr>\n</table>\n</body></html>");
+        out.println("</tr>\n</table>\n" +
+                "<form action = \"HelloForm\" method = \"GET\">\n" +
+                "    Username: <input type = \"text\" name = \"first_name\">\n" +
+                "    <br />\n" +
+                "    Password: <input type = \"text\" name = \"last_name\" />\n" +
+                "    <input type = \"submit\" value = \"Submit\" />\n" +
+                "</form></body></html>");
     }
 
     // Method to handle POST method request.
