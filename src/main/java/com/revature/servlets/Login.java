@@ -1,13 +1,13 @@
 package com.revature.servlets;
 
-// Import required java libraries
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.util.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
-// Extend HttpServlet class
-public class ReadParams extends HttpServlet {
+public class Login {
 
     // Method to handle GET method request.
     // Carries request parameters in appended url string so less secure
@@ -23,15 +23,15 @@ public class ReadParams extends HttpServlet {
                 "<!doctype html public \"-//w3c//dtd html 4.0 " + "transitional//en\">\n";
 
         out.println(docType +
-                        "<html>\n" +
-                        "<head><title>" + title + "</title></head>\n" +
-                        "<body bgcolor = \"#f0f0f0\">\n" +
-                        "<h1 align = \"center\">" + title + "</h1>\n" +
-                        "<table width = \"100%\" border = \"1\" align = \"center\">\n" +
-                        "<tr bgcolor = \"#949494\">\n" +
-                        "<th>Param Name</th>" +
-                        "<th>Param Value(s)</th>\n"+
-                        "</tr>\n"
+                "<html>\n" +
+                "<head><title>" + title + "</title></head>\n" +
+                "<body bgcolor = \"#f0f0f0\">\n" +
+                "<h1 align = \"center\">" + title + "</h1>\n" +
+                "<table width = \"100%\" border = \"1\" align = \"center\">\n" +
+                "<tr bgcolor = \"#949494\">\n" +
+                "<th>Param Name</th>" +
+                "<th>Param Value(s)</th>\n"+
+                "</tr>\n"
         );
 
         Enumeration paramNames = request.getParameterNames();
