@@ -43,6 +43,7 @@ public class UserRepository {
         session.getTransaction().commit();
 
         session.close();
+
         return false;
     }
 
@@ -156,6 +157,8 @@ public class UserRepository {
 
     /**
      * A method to get a single user by a given username and password
+
+     * @param username the users username
      * @param password the users password
      * @return returns an optional user
      * @throws SQLException e
@@ -206,7 +209,9 @@ public class UserRepository {
 
     public boolean updateAUser(User newUser) {
 
+
         boolean result= false;
+
         Transaction tx = null;
 
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -217,7 +222,9 @@ public class UserRepository {
 
             session.update(newUser);
 
+
             result = true;
+
             tx.commit();
 
         }catch (HibernateException e) {
@@ -228,6 +235,7 @@ public class UserRepository {
         }
 
         return result;
+
     }
 
     //---------------------------------- DELETE -------------------------------------------- //
@@ -239,17 +247,16 @@ public class UserRepository {
      * @throws SQLException
      */
     public boolean deleteAUserById(Integer userId) {
+
         Transaction tx = null;
         Session session = HibernateUtil.getSessionFactory().openSession();
         boolean deleted = false;
 
         try {
             tx = session.beginTransaction();
-
             User user = (User) session.get(User.class, userId);
             session.delete(user);
-
-            deleted =true;
+            deleted = true;
             tx.commit();
         }catch (HibernateException e) {
             if(tx != null) tx.rollback();
@@ -259,6 +266,29 @@ public class UserRepository {
         }
 
         return deleted;
+    }
+
+    /**
+     * A method to delete a single User from the database
+     * @param username string of username you are trying to delete
+     * @return returns true if one and only one record is updated
+     * @throws SQLException
+     */
+    public boolean deleteByUsername(String username) {
+        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            String deleteSql = "DELETE FROM " +
+                    "project_1.ers_users where username=?";
+
+            PreparedStatement ps = conn.prepareStatement(deleteSql);
+            ps.setString(1, username);
+            //get the number of affected rows
+            System.out.println("[INFO] UserRepository.deleteAUserById - prepared statement: " + ps.toString());
+            int rowsInserted = ps.executeUpdate();
+            return rowsInserted == 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**

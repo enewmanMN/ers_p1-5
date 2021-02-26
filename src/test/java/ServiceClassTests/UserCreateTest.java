@@ -39,6 +39,16 @@ public class UserCreateTest {
                         "User Not Valid");
         }
 
+
+        @Test
+        @DisplayName("Check create method")
+        public void checkUserIsValid() {
+                userService.register(eric);
+
+                assertEquals(true, userService.isUserValid(eric),
+                        "User Not Valid");
+        }
+
         @AfterEach
         public void tearDown() {
                 userService.deleteByUsername(eric.getUsername());
