@@ -1,3 +1,4 @@
+import com.revature.dtos.RbDTO;
 import com.revature.models.Reimbursement;
 import com.revature.models.ReimbursementStatus;
 import com.revature.models.ReimbursementType;
@@ -19,6 +20,7 @@ public class ReimbursementRepoTest {
 
     private ReimbursementsRepository repo;
     private Reimbursement reim;
+    private ReimbursementService reimbService;
     private User eric;
     private UserService userService;
 
@@ -47,20 +49,58 @@ public class ReimbursementRepoTest {
         reim.setDescription("keflklkef");//
         reim.setResolved(new Timestamp(System.currentTimeMillis()));//
         reim.setResolverId(eric);
-        reim.setReimbursementStatus(ReimbursementStatus.PENDING);//
+        reim.setReimbursementStatus(ReimbursementStatus.APPROVED);//
         reim.setSubmitted(new Timestamp(System.currentTimeMillis()));//
         reim.setReceipt(null);//
+
+        reimbService = new ReimbursementService();
+
+    }
+
+//    @Test
+//    @DisplayName("Check create method")
+//    public void createTest() {
+//
+//        repo.addReimbursement(reim);
+//
+//    }
+
+//    @Test
+//    @DisplayName("Check list all reimbursement method")
+//    public void listAllReimbursementTest() {
+//        List<Reimbursement> r = reimbService.getAllReimb();
+//
+//        for (Reimbursement u : r) {
+//            System.out.println(u);
+//
+//        }
+//    }
+
+//    @Test
+//    @DisplayName("Check list all reimbursement by author id method")
+//    public void listAllReimbursementByAuthorIdTest(){
+//
+//        List<RbDTO> r = reimbService.getReimbByUserId(1);
+//
+//        for(RbDTO u : r) {
+//            System.out.println(u);
+//        }
+//
+//    }
+
+    @Test
+    @DisplayName("Check list all reimbursement by author id method")
+    public void listAllReimbursementByStatusIdTest(){
 
     }
 
     @Test
-    @DisplayName("Check create method")
-    public void createTest() {
-
-        repo.addReimbursement(reim);
-
+    @DisplayName("Check list all reimbursement by author id method")
+    public void listAllReimbursementByStatusIdAndAuthorIdTest(){
 
     }
+
+
 
 //    @AfterEach
 //    public void tearDown() {

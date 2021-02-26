@@ -12,7 +12,9 @@ import java.util.Optional;
  * input before being sent to the database.
  */
 public class UserService {
+
     private UserRepository userRepo = new UserRepository();
+
     /**
      * Gets all users from the DataBase
      * @return A list of Users
@@ -83,6 +85,18 @@ public class UserService {
             throw new RuntimeException("THE PROVIDED ID CANNOT BE LESS THAN OR EQUAL TO ZERO");
         }
         return userRepo.deleteAUserById(id);
+    }
+
+    /**
+     * ACTUALLY REMOVES ENTRY FROM DATABASE - UNLIKE DELETEBYID
+     * @param username of user to delete
+     * @return true if role was updated in db
+     */
+    public boolean deleteByUsername(String username) {
+        if (username.equals(null)){
+            throw new RuntimeException("THE PROVIDED ID CANNOT BE LESS THAN OR EQUAL TO ZERO");
+        }
+        return userRepo.deleteByUsername(username);
     }
 
     /**

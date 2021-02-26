@@ -11,10 +11,27 @@ public class HibernateUtil
 
     private static SessionFactory buildSessionFactory()
     {
+        if(sessionFactory == null)
         try
         {
+//            try
+//            {
+//                if (sessionFactory == null) {
+//                    StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder().configure("hibernate.cfg.xml").build();
+//                    Metadata metaData = new MetadataSources(standardRegistry).getMetadataBuilder().build();
+//                    sessionFactory = metaData.getSessionFactoryBuilder().build();
+//                }
+//                // Create the SessionFactory from hibernate.cfg.xml
+//                return sessionFactory;
+//            }
             // Create the SessionFactory from hibernate.cfg.xml
-            return new Configuration().configure(new File("C:/Users/Ti/Desktop/p.15/ers_p1-5/src/main/resources/hibernate.cfg.xml")).buildSessionFactory();
+            try {
+                //if on the web
+                return new Configuration().configure(new File("webapps/test/WEB-INF/classes/hibernate.cfg.xml")).buildSessionFactory();
+            } catch (Exception e) {
+                return new Configuration().configure(new File("src/main/resources/hibernate.cfg.xml")).buildSessionFactory();
+            }
+
         }
 
         catch (Throwable ex) {
@@ -22,6 +39,8 @@ public class HibernateUtil
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }
+
+        return null;
     }
 
     public static SessionFactory getSessionFactory() {
