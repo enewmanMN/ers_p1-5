@@ -11,6 +11,7 @@ public class HibernateUtil
 
     private static SessionFactory buildSessionFactory()
     {
+        if(sessionFactory == null)
         try
         {
 //            try
@@ -31,12 +32,17 @@ public class HibernateUtil
                 return new Configuration().configure(new File("src/main/resources/hibernate.cfg.xml")).buildSessionFactory();
             }
 
+        
+
+
         }
         catch (Throwable ex) {
             // Make sure you log the exception, as it might be swallowed
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }
+
+        return null;
     }
 
     public static SessionFactory getSessionFactory() {

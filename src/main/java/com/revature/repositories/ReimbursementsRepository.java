@@ -159,6 +159,7 @@ public class ReimbursementsRepository {
         List<Reimbursement> reimbursements = null;
         Reimbursement reimbursement = null;
 
+
         Transaction tx = null;
         Session session = HibernateUtil.getSessionFactory().openSession();
 
@@ -168,6 +169,7 @@ public class ReimbursementsRepository {
             reimbursements = session.createQuery(hql)
                     .setParameter("id", reimbId)
                     .list();
+
 
             reimbursement = reimbursements.get(0);
         } catch (HibernateException e) {
@@ -192,7 +194,6 @@ public class ReimbursementsRepository {
      * @throws SQLException e
      */
     public List<Reimbursement> getAllReimbSetByAuthorId(Integer authorId){
-
         List<Reimbursement> returnList = getAllReimbursements();
 
         for (Reimbursement reim : returnList) {
@@ -229,6 +230,7 @@ public class ReimbursementsRepository {
 //        }
 //
 //        return reimb;
+
     }
 
     /**
@@ -240,6 +242,7 @@ public class ReimbursementsRepository {
      */
     @SuppressWarnings("unchecked")
     public List<Reimbursement> getAllReimbSetByAuthorIdAndStatus(Integer authorId, ReimbursementStatus reStat) throws SQLException {
+
 
         List<Reimbursement> reimbursements = null;
 
@@ -300,7 +303,6 @@ public class ReimbursementsRepository {
     @SuppressWarnings("unchecked")
     public List<Reimbursement> getAllReimbSetByType(Integer typeId)  {
 
-
         List<Reimbursement> returnList = getAllReimbursements();
 
         for (Reimbursement reim : returnList) {
@@ -331,6 +333,7 @@ public class ReimbursementsRepository {
 //        }
 //
 //        return reimbursements;
+
     }
 
     /**
@@ -531,6 +534,18 @@ public class ReimbursementsRepository {
             int rowsInserted = ps.executeUpdate();
             return rowsInserted != 0;
         }
+
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Transaction tx = null;
+//
+//        boolean success = false;
+//
+//        try{
+//            tx = session.beginTransaction();
+//            Reimbursement reimb = getAReimbByReimbId(reimbId).get();
+//            reimb.setResolverId(resolverId);
+//            session.update();
+//        }
     }
 
     /**
@@ -602,6 +617,8 @@ public class ReimbursementsRepository {
         } finally {
             session.close();
         }
+
+
     }
 
     //---------------------------------- UTIL -------------------------------------------- //

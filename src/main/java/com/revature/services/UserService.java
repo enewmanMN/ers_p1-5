@@ -12,7 +12,9 @@ import java.util.Optional;
  * input before being sent to the database.
  */
 public class UserService {
+
     private UserRepository userRepo = new UserRepository();
+
     /**
      * Gets all users from the DataBase
      * @return A list of Users
