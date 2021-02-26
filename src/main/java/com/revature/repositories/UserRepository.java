@@ -163,7 +163,7 @@ public class UserRepository {
     /**
      * A method to get a single user by a given username and password
 
-     * @param username the users username
+     * @param userName the users username
      * @param password the users password
      * @return returns an optional user
      * @throws SQLException e
