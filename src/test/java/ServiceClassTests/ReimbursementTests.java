@@ -51,7 +51,7 @@ public class ReimbursementTests {
         eric2.setPassword("Packers2");
 
         //initialize the userservice that actually does the act of registering and such
-        userService = new UserService();
+        userService = UserService.getInstance();
         userService.register(eric);
         userService.register(eric2);
 

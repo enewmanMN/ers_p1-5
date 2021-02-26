@@ -36,7 +36,7 @@ public class UserRepoTest {
         kim.setPassword("kimberly");
 
         //initialize the userservice that actually does the act of registering and such
-        userService = new UserService();
+        userService = UserService.getInstance();
 
 
     }

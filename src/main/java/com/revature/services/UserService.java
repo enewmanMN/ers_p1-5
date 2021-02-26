@@ -13,8 +13,18 @@ import java.util.Optional;
  */
 public class UserService {
 
+    private static final UserService userService = new UserService(UserRepository.getInstance());
+
     private UserRepository userRepo = new UserRepository();
 
+    private UserService(UserRepository repo) {
+        super();
+        this.userRepo = repo;
+    }
+
+    public static UserService getInstance() {
+        return userService;
+    }
     /**
      * Gets all users from the DataBase
      * @return A list of Users

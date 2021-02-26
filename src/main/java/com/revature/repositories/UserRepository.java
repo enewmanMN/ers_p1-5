@@ -13,6 +13,11 @@ import java.util.*;
 
 public class UserRepository {
 
+    private static final UserRepository userRepo = new UserRepository();
+    public static UserRepository getInstance() {
+        return userRepo;
+    }
+
     private String baseQuery = "SELECT * FROM project_1.ers_users eu ";
     private String baseInsert = "INSERT INTO project_1.ers_users ";
     private String baseUpdate = "UPDATE project_1.ers_users eu ";

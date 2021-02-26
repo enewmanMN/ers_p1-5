@@ -37,7 +37,7 @@ public class ReimbursementRepoTest {
         eric.setPassword("Packers1");
 
         //initialize the userservice that actually does the act of registering and such
-        userService = new UserService();
+        userService = UserService.getInstance();
 
 
         repo = new ReimbursementsRepository();
