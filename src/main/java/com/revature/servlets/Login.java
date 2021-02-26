@@ -8,6 +8,7 @@ import com.revature.dtos.Credentials;
 import com.revature.dtos.HttpStatus;
 import com.revature.exceptions.AuthenticationException;
 import com.revature.models.User;
+import com.revature.repositories.UserRepository;
 import com.revature.services.UserService;
 import com.revature.util.ErrorResponseFactory;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +32,7 @@ public class Login extends HttpServlet {
 
     private final ErrorResponseFactory errRespFactory = ErrorResponseFactory.getInstance();
     public final UserService userService = UserService.getInstance();
+    private final UserRepository userRepository = UserRepository.getInstance();
     private static final Logger LOG = LogManager.getLogger(UserServlet.class);
 
     // Method to handle GET method request.
@@ -54,9 +56,6 @@ public class Login extends HttpServlet {
             LOG.info("Establishing a session for user, {}", credentials.getUsername());
             request.getSession().setAttribute("this-user", authenticateUser);
 
-            if(authenticateUser.getUserRole().equals(3)) {
-                out.write("<p> im inside employee</p>");
-            }
 
             response.setStatus(200);
         } catch (MismatchedInputException e) {
@@ -69,10 +68,10 @@ public class Login extends HttpServlet {
             response.setStatus(401);
             out.write(errRespFactory.generateErrorResponse(401, e.getMessage()).toJSON());
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(out);
             LOG.error(e.getMessage());
             response.setStatus(500);
-            out.write(errRespFactory.generateErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR).toJSON());
+            out.write("... message cause: " + e.getCause().toString() + " came from here/local " + e.getLocalizedMessage());
         }
     }
 

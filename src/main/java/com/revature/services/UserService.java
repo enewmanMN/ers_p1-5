@@ -86,6 +86,19 @@ public class UserService {
     }
 
     /**
+     * get a user by their username
+     * @param username username of user in the database
+     * @return returns a user
+     */
+    public User getByUsername(String username) {
+        if (username == null || username.trim().equals("") ){
+            throw new RuntimeException("Invalid credentials provided");
+        }
+        return userRepo.getAUserByUsername(username)
+                .orElseThrow(RuntimeException::new);
+    }
+
+    /**
      * Deletes a user by changing their role to 4
      * @param id id of user to delete
      * @return true if role was updated in db

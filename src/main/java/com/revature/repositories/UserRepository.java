@@ -226,8 +226,6 @@ public class UserRepository {
             tx = session.beginTransaction();
 
             session.update(newUser);
-
-
             result = true;
 
             tx.commit();

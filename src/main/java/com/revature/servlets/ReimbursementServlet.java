@@ -2,8 +2,6 @@ package com.revature.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.revature.dtos.Credentials;
-import com.revature.models.Reimbursement;
 import com.revature.models.User;
 import com.revature.repositories.UserRepository;
 import com.revature.services.ReimbursementService;
@@ -20,8 +18,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(name="/User", urlPatterns = "/User")
-public class UserServlet extends HttpServlet {
+@WebServlet(name="/Reimbursement", urlPatterns = "/Reimbursement")
+public class ReimbursementServlet extends HttpServlet {
+
     private static final Logger LOG = LogManager.getLogger(UserServlet.class);
 
     private final UserService USER_SERVICE = UserService.getInstance();
@@ -45,12 +44,12 @@ public class UserServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         User rqstr = (session == null) ? null : (User) request.getSession(false).getAttribute("this-user");
 
-        //admin
+
         try {
-            if (rqstr.getUserRole() == 1) {
-                User newUser = mapper.readValue(request.getInputStream(), User.class);
-                LOG.info("Adding new user, {}", newUser.toString());
-                USER_SERVICE.register(newUser);
+            if (rqstr.getUserRole() == 2 || rqstr.getUserRole() == 1) {
+                ReimbursementServlet reimbursement = mapper.readValue(request.getInputStream(), ReimbursementServlet.class);
+                LOG.info("Adding new reimbursement, {}", reimbursement.toString());
+
 
                 response.setStatus(200);
             }
@@ -72,28 +71,28 @@ public class UserServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-            PrintWriter out = response.getWriter();
-            ObjectMapper mapper = new ObjectMapper();
-            response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        ObjectMapper mapper = new ObjectMapper();
+        response.setContentType("application/json");
 
-            HttpSession session = request.getSession(false);
-            User rqstr = (session == null) ? null : (User) request.getSession(false).getAttribute("this-user");
+        HttpSession session = request.getSession(false);
+        User rqstr = (session == null) ? null : (User) request.getSession(false).getAttribute("this-user");
 
-            try {
-                if (rqstr.getUserRole() == 1) {
-                    User updateUser = mapper.readValue(request.getInputStream(), User.class);
-                    LOG.info("Updating user, {}", updateUser.toString());
+        try {
+            if (rqstr.getUserRole() == 1) {
+                User updateUser = mapper.readValue(request.getInputStream(), User.class);
+                LOG.info("Updating user, {}", updateUser.toString());
 
-                    UserService.getInstance().update(updateUser);
+                UserService.getInstance().update(updateUser);
 
-                    response.setStatus(200);
-                }
-
-            }catch (MismatchedInputException e) {
-                e.printStackTrace();
-                response.setStatus(400);
-                out.write("400 error");
+                response.setStatus(200);
             }
+
+        }catch (MismatchedInputException e) {
+            e.printStackTrace();
+            response.setStatus(400);
+            out.write("400 error");
+        }
 
     }
 
@@ -153,26 +152,26 @@ public class UserServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         User rqstr = (session == null) ? null : (User) request.getSession(false).getAttribute("this-user");
 
-            try {
-                if (rqstr.getUserRole() == 1) {
-                    User getUser = mapper.readValue(request.getInputStream(), User.class);
-                    LOG.info("Getting user, {}", getUser.toString());
+        try {
+            if (rqstr.getUserRole() == 1) {
+                User getUser = mapper.readValue(request.getInputStream(), User.class);
+                LOG.info("Getting user, {}", getUser.toString());
 
 
 
-                    User user = UserService.getInstance().getByUsername(getUser.getUsername());
+                User user = UserService.getInstance().getByUsername(getUser.getUsername());
 
-                    out.write(mapper.writeValueAsString(user));
+                out.write(mapper.writeValueAsString(user));
 
 
-                    response.setStatus(200);
-                }
-
-            }catch (MismatchedInputException e) {
-                e.printStackTrace();
-                response.setStatus(400);
-                out.write("400 error");
+                response.setStatus(200);
             }
+
+        }catch (MismatchedInputException e) {
+            e.printStackTrace();
+            response.setStatus(400);
+            out.write("400 error");
+        }
 
     }
 
