@@ -1,12 +1,15 @@
 package ServiceClassTests;
 
 import com.revature.models.User;
+import com.revature.repositories.UserRepository;
 import com.revature.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,12 +19,12 @@ public class UserValidationTests {
     private User eric;
     private User eric2;
     private UserService userService;
-
+    private UserRepository userRepo;
     @BeforeEach
     public void setUp() {
         //set up the user we can try to add to the db
         eric = new User();
-        eric.setEmail("erics@email");
+        eric.setEmail("ericsvalid@email");
         eric.setFirstname("Eric");
         eric.setLastname("Newman");
         eric.setUsername("enewman11");
@@ -38,6 +41,7 @@ public class UserValidationTests {
         eric2.setUserRole(2);
         eric2.setPassword("Packers2");
 
+        userRepo = new UserRepository();
         //initialize the userservice that actually does the act of registering and such
         userService = UserService.getInstance();
     }

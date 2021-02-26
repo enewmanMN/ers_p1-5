@@ -18,7 +18,7 @@ public class UserCreateTest {
         public void setUp() {
                 //set up the user we can try to add to the db
                 eric = new User();
-                eric.setEmail("erics@email");
+                eric.setEmail("ericscreate@email");
                 eric.setFirstname("Eric");
                 eric.setLastname("Newman");
                 eric.setUsername("enewman11");

@@ -55,7 +55,7 @@ public class ReimbursementsRepository {
         Transaction tx= null;
         try {
             tx = session.beginTransaction();
-
+            //session.update(reimbursement);
             session.save(reimbursement);
 
             tx.commit();
@@ -495,44 +495,44 @@ public class ReimbursementsRepository {
     }
 
     public boolean updateFIN(Integer resolverId, Integer statusId, Integer reimbId) {
-        Transaction tx = null;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        boolean updated = false;
-        Reimbursement reimbursement;
-
-        try{
-            tx = session.beginTransaction();
-            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
-            reimbursement.setResolverId(session.get(User.class, resolverId));
-            reimbursement.setReimbursementStatus(ReimbursementStatus.getByNumber(statusId));
-            session.save(reimbursement);
-            tx.commit();
-            updated = true;
-        } catch (HibernateException e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-
-        } finally {
-            session.close();
-        }
-
-        return updated;
-//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-//            String sql = baseUpdate +
-//                    "SET resolver_id=?, reimbursement_status_id=?, resolved=CURRENT_TIMESTAMP\n" +
-//                    "WHERE id=?\n";
-//            PreparedStatement ps = conn.prepareStatement(sql);
-//            ps.setInt(1, resolverId);
-//            ps.setInt(2, statusId);
-//            ps.setInt(3,reimbId);
+//        Transaction tx = null;
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        boolean updated = false;
+//        Reimbursement reimbursement;
 //
-//            //get the number of affected rows
-//            int rowsInserted = ps.executeUpdate();
-//            return rowsInserted != 0;
-//        } catch (SQLException e) {
+//        try{
+//            tx = session.beginTransaction();
+//            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+//            reimbursement.setResolverId(session.get(User.class, resolverId));
+//            reimbursement.setReimbursementStatus(ReimbursementStatus.getByNumber(statusId));
+//            session.update(reimbursement);
+//            tx.commit();
+//            updated = true;
+//        } catch (HibernateException e) {
+//            if (tx != null) tx.rollback();
 //            e.printStackTrace();
+//
+//        } finally {
+//            session.close();
 //        }
-//        return false;
+//
+//        return updated;
+        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            String sql = baseUpdate +
+                    "SET resolver_id=?, reimbursement_status_id=?, resolved=CURRENT_TIMESTAMP\n" +
+                    "WHERE id=?\n";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, resolverId);
+            ps.setInt(2, statusId);
+            ps.setInt(3,reimbId);
+
+            //get the number of affected rows
+            int rowsInserted = ps.executeUpdate();
+            return rowsInserted != 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
