@@ -4,7 +4,13 @@ import com.revature.dtos.RbDTO;
 import com.revature.models.Reimbursement;
 import com.revature.models.ReimbursementStatus;
 import com.revature.models.ReimbursementType;
+import com.revature.models.User;
 import com.revature.util.ConnectionFactory;
+import com.revature.util.HibernateUtil;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +24,12 @@ import java.util.*;
  * A class to interact with the database to CRUD reimbursement objects
  */
 public class ReimbursementsRepository {
+
+    private static final ReimbursementsRepository reimbursementsRepository = new ReimbursementsRepository();
+    public static ReimbursementsRepository getInstance() {
+        return reimbursementsRepository;
+    }
+
     //base query that combines the name and resolver names from one query
     private String baseQuery = "SELECT er.id, er.amount, er.description, er.reimbursement_status_id, \n" +
             "er.reimbursement_type_id, er.resolved, er.submitted,  er.author_id , er.resolver_id,\n" +
@@ -44,55 +56,102 @@ public class ReimbursementsRepository {
      */
     // TODO add support to persist receipt images to data source
     public boolean addReimbursement(Reimbursement reimbursement) {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseInsert +
-                    "(amount, description, author_id, " +
-                    "reimbursement_status_id, reimbursement_type_id)\n" +
-                    "VALUES(?, ?, ?, 1, ?);\n";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setDouble(1,reimbursement.getAmount());
-            ps.setString(2,reimbursement.getDescription());
-            ps.setInt(3,reimbursement.getAuthorId());
-            //Reimbursements are submitted with PENDING  status by Default!
-            ps.setInt(4,reimbursement.getReimbursementType().ordinal() + 1);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx= null;
+        try {
+            tx = session.beginTransaction();
+            //session.update(reimbursement);
+            session.save(reimbursement);
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx!=null) tx.rollback();
+            throw e;
+        } finally {
+            session.close();
+            return true;
         }
-        return false;
+
     }
 
     //---------------------------------- READ -------------------------------------------- //
 
-    public List<RbDTO> getAllReimbursements() {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + " order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    public List<Reimbursement> getAllReimbursements() {
 
-            ResultSet rs = ps.executeQuery();
+        List reimb = null;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-            reimbursements = mapResultSetDTO(rs);
-        } catch (SQLException e) {
+        try {
+            tx = session.beginTransaction();
+            reimb = session.createQuery("FROM Reimbursement").list();
+
+            for(Iterator iterator = reimb.iterator(); iterator.hasNext();) {
+                Reimbursement getReimb = (Reimbursement) iterator.next();
+            }
+            tx.commit();
+        } catch (HibernateException e) {
+            if(tx != null) tx.rollback();
             e.printStackTrace();
+        } finally {
+            session.close();
         }
-        return reimbursements;
+
+        return reimb;
+
+//        List<RbDTO> reimbursements = new ArrayList<>();
+//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+//            String sql = baseQuery + " order by er.id";
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//
+//            ResultSet rs = ps.executeQuery();
+//
+//            reimbursements = mapResultSetDTO(rs);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return reimbursements;
     }
 
-    public List<RbDTO> getAllReimbSetByStatus(Integer statusId) {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.reimbursement_status_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,statusId);
-            ResultSet rs = ps.executeQuery();
-            reimbursements = mapResultSetDTO(rs);
-        } catch (SQLException e) {
+    public List<Reimbursement> getAllReimbSetByStatus(Integer statusId) {
+//        List<RbDTO> reimbursements = new ArrayList<>();
+//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+//            String sql = baseQuery + "WHERE er.reimbursement_status_id=? order by er.id";
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//            ps.setInt(1,statusId);
+//            ResultSet rs = ps.executeQuery();
+//            reimbursements = mapResultSetDTO(rs);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return reimbursements;
+
+        List<Reimbursement> reimbStatus = null;
+        Transaction tx = null;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+            tx = session.beginTransaction();
+
+            String hql = "FROM Reimbursement r WHERE r.reimbursementStatus = :statusId";
+            Query query = session.createQuery(hql);
+            query.setParameter("statusId", ReimbursementStatus.APPROVED);
+            reimbStatus = query.list();
+
+
+            System.out.println(reimbStatus.toString());
+
+
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
             e.printStackTrace();
+        } finally {
+            session.close();
         }
-        return reimbursements;
+
+        return reimbStatus;
     }
 
     /**
@@ -101,19 +160,38 @@ public class ReimbursementsRepository {
      * @return returns an Option Reimbursement object
      * @throws SQLException e
      */
+    @SuppressWarnings("unchecked")
     public Optional<Reimbursement> getAReimbByReimbId(Integer reimbId) throws SQLException {
-        Optional<Reimbursement> reimbursement = Optional.empty();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
 
-            ps.setInt(1,reimbId);
+        List<Reimbursement> reimbursements = null;
+        Reimbursement reimbursement = null;
 
-            ResultSet rs = ps.executeQuery();
 
-            reimbursement = mapResultSet(rs).stream().findFirst();
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try{
+            tx = session.beginTransaction();
+            String hql = "FROM Reimbursement r where r.id = :id";
+            reimbursements = session.createQuery(hql)
+                    .setParameter("id", reimbId)
+                    .list();
+
+
+            reimbursement = reimbursements.get(0);
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
-        return reimbursement;
+
+        if(reimbursement != null) {
+            return Optional.of(reimbursement);
+        }
+        else{
+            return Optional.empty();
+        }
     }
 
     /**
@@ -122,21 +200,39 @@ public class ReimbursementsRepository {
      * @return a set of reimbursements mapped by the MapResultSet method
      * @throws SQLException e
      */
-    public List<RbDTO> getAllReimbSetByAuthorId(Integer authorId){
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.author_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    public List<Reimbursement> getAllReimbSetByAuthorId(Integer authorId){
+        List<Reimbursement> returnList = getAllReimbursements();
 
-            ps.setInt(1,authorId);
+        for (Reimbursement reim : returnList) {
+            if (reim.getAuthorId().getUserId() == authorId) {
 
-            ResultSet rs = ps.executeQuery();
-
-            reimbursements = mapResultSetDTO(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            } else {
+                returnList.remove(this);
+            }
         }
-        return reimbursements;
+        return returnList;
+
+
+//        List<Reimbursement> reimbursements = null;
+//        Transaction tx = null;
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//
+//        try {
+//            tx = session.beginTransaction();
+//            String hql = "FROM Reimbursement r where r.authorId = :authorId";
+//            reimbursements = session.createQuery(hql)
+//                    .setParameter("authorId", authorId)
+//                    .list();
+//
+//        } catch (HibernateException e) {
+//            if (tx!= null) tx.rollback();
+//
+//        } finally {
+//            session.close();
+//        }
+//
+//        return reimbursements;
+
     }
 
     /**
@@ -146,17 +242,30 @@ public class ReimbursementsRepository {
      * @return a set of reimbursements mapped by the MapResultSet method
      * @throws SQLException e
      */
-    public List<RbDTO> getAllReimbSetByAuthorIdAndStatus(Integer authorId, ReimbursementStatus reStat) throws SQLException {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.author_id=? AND er.reimbursement_status_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    @SuppressWarnings("unchecked")
+    public List<Reimbursement> getAllReimbSetByAuthorIdAndStatus(Integer authorId, ReimbursementStatus reStat) throws SQLException {
 
-            ps.setInt(1,authorId);
-            ps.setInt(2,reStat.ordinal() + 1);
-            ResultSet rs = ps.executeQuery();
-            reimbursements = mapResultSetDTO(rs);
+
+        List<Reimbursement> reimbursements = null;
+
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try{
+            tx = session.beginTransaction();
+            String hql = "FROM Reimbursement r where r.authorId = :authorId" +
+                         " and r.reimbursementStatus = :reimbursement_status_id";
+            reimbursements = session.createQuery(hql)
+                             .setParameter("authorId", authorId)
+                             .setParameter("reimbursement_status_id", reStat)
+                             .list();
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
+
         return reimbursements;
     }
 
@@ -167,32 +276,66 @@ public class ReimbursementsRepository {
      * @return a set of reimbursements mapped by the MapResultSet method
      * @throws SQLException e
      */
-    public List<RbDTO> getAllReimbSetByAuthorIdAndType(Integer authorId, ReimbursementType reType) throws SQLException {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.author_id=? AND er.reimbursement_type_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    @SuppressWarnings("unchecked")
+    public List<Reimbursement> getAllReimbSetByAuthorIdAndType(Integer authorId, ReimbursementType reType) throws SQLException {
 
-            ps.setInt(1,authorId);
-            ps.setInt(2,reType.ordinal() + 1);
-            ResultSet rs = ps.executeQuery();
-            reimbursements = mapResultSetDTO(rs);
+        List<Reimbursement> reimbursements = null;
+
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try{
+            tx = session.beginTransaction();
+            String hql = "FROM Reimbursement r where r.authorId = :author_id" +
+                    " and r.reimbursementType = :reimbursement_type_id";
+            reimbursements = session.createQuery(hql)
+                    .setParameter("author_id", authorId)
+                    .setParameter("reimbursement_type_id", reType)
+                    .list();
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
+
         return reimbursements;
     }
 
-    public List<RbDTO> getAllReimbSetByType(Integer typeId)  {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.reimbursement_type_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,typeId);
-            ResultSet rs = ps.executeQuery();
-            reimbursements = mapResultSetDTO(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    @SuppressWarnings("unchecked")
+    public List<Reimbursement> getAllReimbSetByType(Integer typeId)  {
+
+        List<Reimbursement> returnList = getAllReimbursements();
+
+        for (Reimbursement reim : returnList) {
+            if (reim.getReimbursementType().ordinal() == typeId) {
+
+            } else {
+                returnList.remove(this);
+            }
         }
-        return reimbursements;
+        return returnList;
+
+//        List<Reimbursement> reimbursements = null;
+//
+//        Transaction tx = null;
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//
+//        try{
+//            tx = session.beginTransaction();
+//            String hql = "FROM Reimbursement r where r.reimbursementType = :reimbursement_type_id";
+//            reimbursements = session.createQuery(hql)
+//                    .setParameter("reimbursement_type_id", typeId)
+//                    .list();
+//        } catch (HibernateException e) {
+//            if (tx != null) tx.rollback();
+//            e.printStackTrace();
+//        } finally {
+//            session.close();
+//        }
+//
+//        return reimbursements;
+
     }
 
     /**
@@ -201,18 +344,27 @@ public class ReimbursementsRepository {
      * @return a set of reimbursements mapped by the MapResultSet method
      * @throws SQLException e
      */
-    public List<RbDTO> getAllReimbSetByResolverId(Integer resolverId) throws SQLException {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.resolver_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    @SuppressWarnings("unchecked")
+    public List<Reimbursement> getAllReimbSetByResolverId(Integer resolverId) throws SQLException {
 
-            ps.setInt(1,resolverId);
+        List<Reimbursement> reimbursements = null;
 
-            ResultSet rs = ps.executeQuery();
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
-            reimbursements = mapResultSetDTO(rs);
+        try{
+            tx = session.beginTransaction();
+            String hql = "FROM Reimbursement r where r.resolverId = :resolver_id";
+            reimbursements = session.createQuery(hql)
+                    .setParameter("resolver_id", resolverId)
+                    .list();
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
+
         return reimbursements;
     }
 
@@ -223,17 +375,40 @@ public class ReimbursementsRepository {
      * @return a set of reimbursements mapped by the MapResultSet method
      * @throws SQLException e
      */
-    public List<RbDTO> getAllReimbSetByResolverIdAndStatus(Integer resolverId, ReimbursementStatus reStat) throws SQLException {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.resolver_id=? AND er.reimbursement_status_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    @SuppressWarnings("unchecked")
+    public List<Reimbursement> getAllReimbSetByResolverIdAndStatus(Integer resolverId, ReimbursementStatus reStat) throws SQLException {
+//        List<RbDTO> reimbursements = new ArrayList<>();
+//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+//            String sql = baseQuery + "WHERE er.resolver_id=? AND er.reimbursement_status_id=? order by er.id";
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//
+//            ps.setInt(1,resolverId);
+//            ps.setInt(2,reStat.ordinal() + 1);
+//            ResultSet rs = ps.executeQuery();
+//            reimbursements = mapResultSetDTO(rs);
+//        }
+//        return reimbursements;
 
-            ps.setInt(1,resolverId);
-            ps.setInt(2,reStat.ordinal() + 1);
-            ResultSet rs = ps.executeQuery();
-            reimbursements = mapResultSetDTO(rs);
+        List<Reimbursement> reimbursements = null;
+
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try{
+            tx = session.beginTransaction();
+            String hql = "FROM Reimbursement r where r.resolverId = :resolver_id"
+                        +" and r.reimbursementStatus = :reimbursement_status_id";
+            reimbursements = session.createQuery(hql)
+                    .setParameter("resolver_id", resolverId)
+                    .setParameter("reimbursement_status_id", reStat)
+                    .list();
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
+
         return reimbursements;
     }
 
@@ -244,41 +419,105 @@ public class ReimbursementsRepository {
      * @return a set of reimbursements mapped by the MapResultSet method
      * @throws SQLException e
      */
-    public List<RbDTO> getAllReimbSetByResolverIdAndType(Integer resolverId, ReimbursementType reType) throws SQLException {
-        List<RbDTO> reimbursements = new ArrayList<>();
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + "WHERE er.resolver_id=? AND er.reimbursement_type_id=? order by er.id";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    @SuppressWarnings("unchecked")
+    public List<Reimbursement> getAllReimbSetByResolverIdAndType(Integer resolverId, ReimbursementType reType) throws SQLException {
+//        List<RbDTO> reimbursements = new ArrayList<>();
+//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+//            String sql = baseQuery + "WHERE er.resolver_id=? AND er.reimbursement_type_id=? order by er.id";
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//
+//            ps.setInt(1,resolverId);
+//            ps.setInt(2,reType.ordinal() + 1);
+//            ResultSet rs = ps.executeQuery();
+//            reimbursements = mapResultSetDTO(rs);
+//        }
+//        return reimbursements;
+        List<Reimbursement> reimbursements = null;
 
-            ps.setInt(1,resolverId);
-            ps.setInt(2,reType.ordinal() + 1);
-            ResultSet rs = ps.executeQuery();
-            reimbursements = mapResultSetDTO(rs);
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try{
+            tx = session.beginTransaction();
+            String hql = "FROM Reimbursement r where r.resolverId = :resolver_id"
+                        +" and r.reimbrusementType = :reimbursement_type_id";
+            reimbursements = session.createQuery(hql)
+                    .setParameter("reimbursement_type_id", reType)
+                    .list();
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
+
         return reimbursements;
     }
 
     //---------------------------------- UPDATE -------------------------------------------- //
     public boolean updateEMP(Reimbursement reimb) {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                    "SET amount=?, description=?, reimbursement_type_id=?\n" +
-                    "WHERE id=?\n";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setDouble(1, reimb.getAmount());
-            ps.setString(2, reimb.getDescription());
-            ps.setInt(3,reimb.getReimbursementType().ordinal() + 1);
-            ps.setInt(4,reimb.getId());
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
-        } catch (SQLException e) {
+
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        boolean updated = false;
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            session.update(reimb);
+            tx.commit();
+            updated = true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
             e.printStackTrace();
+
+        } finally {
+            session.close();
         }
-        return false;
+
+        return updated;
+//        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
+//            String sql = baseUpdate +
+//                    "SET amount=?, description=?, reimbursement_type_id=?\n" +
+//                    "WHERE id=?\n";
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//            ps.setDouble(1, reimb.getAmount());
+//            ps.setString(2, reimb.getDescription());
+//            ps.setInt(3,reimb.getReimbursementType().ordinal() + 1);
+//            ps.setInt(4,reimb.getId());
+//            //get the number of affected rows
+//            int rowsInserted = ps.executeUpdate();
+//            return rowsInserted != 0;
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+
     }
 
     public boolean updateFIN(Integer resolverId, Integer statusId, Integer reimbId) {
+//        Transaction tx = null;
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        boolean updated = false;
+//        Reimbursement reimbursement;
+//
+//        try{
+//            tx = session.beginTransaction();
+//            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+//            reimbursement.setResolverId(session.get(User.class, resolverId));
+//            reimbursement.setReimbursementStatus(ReimbursementStatus.getByNumber(statusId));
+//            session.update(reimbursement);
+//            tx.commit();
+//            updated = true;
+//        } catch (HibernateException e) {
+//            if (tx != null) tx.rollback();
+//            e.printStackTrace();
+//
+//        } finally {
+//            session.close();
+//        }
+//
+//        return updated;
         try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
             String sql = baseUpdate +
                     "SET resolver_id=?, reimbursement_status_id=?, resolved=CURRENT_TIMESTAMP\n" +
@@ -306,17 +545,27 @@ public class ReimbursementsRepository {
      */
     public boolean updateResolvedTimeStampByReimbId(Integer reimbId, Timestamp timestamp) throws SQLException {
 
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                         "SET resolved=?\n" +
-                         "WHERE id=?\n";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setTimestamp(1,timestamp);
-            ps.setInt(2,reimbId);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        boolean updated = false;
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+            reimbursement.setResolved(timestamp);
+            session.save(reimbursement);
+            tx.commit();
+            updated = true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+
+        } finally {
+            session.close();
         }
+
+        return updated;
     }
 
     /**
@@ -328,17 +577,27 @@ public class ReimbursementsRepository {
      */
     public boolean updateResolverIdByReimbId(Integer reimbId, Integer resolverId) throws SQLException {
 
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                    "SET resolver_id=?\n" +
-                    "WHERE id=?\n";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,resolverId);
-            ps.setInt(2,reimbId);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        boolean updated = false;
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+            reimbursement.setResolverId(session.get(User.class, resolverId));
+            session.save(reimbursement);
+            tx.commit();
+            updated = true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+
+        } finally {
+            session.close();
         }
+
+        return updated;
     }
 
     /**
@@ -349,17 +608,27 @@ public class ReimbursementsRepository {
      * @throws SQLException e
      */
     public boolean updateReimbursementTypeByReimbId(Integer reimbId, ReimbursementType reimbursementType) throws SQLException {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                    "SET reimbursement_type_id=? " +
-                    "WHERE er.id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,reimbursementType.ordinal() + 1);
-            ps.setInt(2,reimbId);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        boolean updated = false;
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+            reimbursement.setReimbursementType(reimbursementType);
+            session.save(reimbursement);
+            tx.commit();
+            updated = true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+
+        } finally {
+            session.close();
         }
+
+        return updated;
     }
 
     /**
@@ -370,17 +639,27 @@ public class ReimbursementsRepository {
      * @throws SQLException e
      */
     public boolean updateReimbursementStatusByReimbId(Integer reimbId, ReimbursementStatus newReimbStatus) throws SQLException {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                         "SET reimbursement_status_id=? " +
-                         "WHERE er.id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,newReimbStatus.ordinal() + 1);
-            ps.setInt(2,reimbId);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        boolean updated = false;
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+            reimbursement.setReimbursementStatus(newReimbStatus);
+            session.save(reimbursement);
+            tx.commit();
+            updated = true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+
+        } finally {
+            session.close();
         }
+
+        return updated;
     }
 
 
@@ -393,15 +672,25 @@ public class ReimbursementsRepository {
      * @throws SQLException e
      */
     public boolean delete(Integer reimbId) throws SQLException {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = "DELETE FROM project_1.ers_reimbursements\n" +
-                         "WHERE id=? ";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,reimbId);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            reimbursement = (Reimbursement) session.get(Reimbursement.class, reimbId);
+            session.delete(reimbursement);
+            tx.commit();
+            return true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            session.close();
         }
+
+
     }
 
     //---------------------------------- UTIL -------------------------------------------- //
@@ -420,8 +709,8 @@ public class ReimbursementsRepository {
             temp.setSubmitted(rs.getTimestamp("submitted"));
             temp.setResolved(rs.getTimestamp("resolved"));
             temp.setDescription(rs.getString("description"));
-            temp.setAuthorId(rs.getInt("author_id"));
-            temp.setResolverId(rs.getInt("resolver_id"));
+//            temp.setAuthorId(rs.getInt("author_id"));
+//            temp.setResolverId(rs.getInt("resolver_id"));
             temp.setReimbursementStatus(ReimbursementStatus.getByNumber(rs.getInt("reimbursement_status_id")));
             temp.setReimbursementType(ReimbursementType.getByNumber(rs.getInt("reimbursement_type_id")));
 

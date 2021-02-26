@@ -1,12 +1,28 @@
 package com.revature.repositories;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.revature.models.User;
 import com.revature.util.ConnectionFactory;
+import com.revature.util.HibernateUtil;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.*;
 
 public class UserRepository {
+
+    private static final UserRepository userRepo = new UserRepository();
+    public static UserRepository getInstance() {
+        return userRepo;
+    }
+
     private String baseQuery = "SELECT * FROM project_1.ers_users eu ";
     private String baseInsert = "INSERT INTO project_1.ers_users ";
     private String baseUpdate = "UPDATE project_1.ers_users eu ";
@@ -14,6 +30,7 @@ public class UserRepository {
     public UserRepository(){
         super();
     }
+
 
     //---------------------------------- CREATE -------------------------------------------- //
 
@@ -24,39 +41,65 @@ public class UserRepository {
      * @throws SQLException e
      */
     public boolean addUser(User newUser)  {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseInsert +
-                         "(username, password, first_name, last_name, email, user_role_id)\n" +
-                         "VALUES(?, project_1.crypt(?, project_1.gen_salt('bf', 10)), ?, ?, ?, ?);\n";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1,newUser.getUsername());
-            ps.setString(2,newUser.getPassword());
-            ps.setString(3,newUser.getFirstname());
-            ps.setString(4,newUser.getLastname());
-            ps.setString(5,newUser.getEmail());
-            ps.setInt(6,newUser.getUserRole());
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
+//        try {
+//            hashPass(newUser);
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        } catch (InvalidKeySpecException e) {
+//            e.printStackTrace();
+//        }
+
+        boolean result= false;
+
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        session.beginTransaction();
+
+        session.save(newUser);
+        session.getTransaction().commit();
+
+        session.close();
+
         return false;
     }
 
+//    public String hashPass(String originalPassword) throws NoSuchAlgorithmException, InvalidKeySpecException
+//    {
+//        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
+//        return bcryptHashString;
+//    }
+//
+//    public void hashPass(User user) throws NoSuchAlgorithmException, InvalidKeySpecException
+//    {
+//        String originalPassword = user.getPassword();
+//        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
+//        user.setPassword(bcryptHashString);
+//    }
+
     //---------------------------------- READ -------------------------------------------- //
 
+    @SuppressWarnings("unchecked")
     public List<User> getAllusers() {
-        List<User> users = new ArrayList<>();
-        try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseQuery + " order by eu.id";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            users = mapResultSet(rs);
-        } catch (Exception e) {
+        List<User> users = null;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+            tx = session.beginTransaction();
+            users = session.createQuery("FROM User").list();
+
+            tx.commit();
+        } catch (HibernateException e) {
+            if(tx != null) tx.rollback();
             e.printStackTrace();
+        } finally {
+            session.close();
         }
+
         return users;
+
     }
 
     /**
@@ -66,78 +109,159 @@ public class UserRepository {
      * @throws SQLException e
      */
     public Optional<User> getAUserByEmail(String email) {
-        Optional<User> user = Optional.empty();
-        try (Connection conn = ConnectionFactory.getInstance().getConnection()){
-            String sql = baseQuery + "WHERE email =? ";
-            PreparedStatement psmt = conn.prepareStatement(sql);
-            psmt.setString(1,email);
-            ResultSet rs = psmt.executeQuery();
-            user = mapResultSet(rs).stream().findFirst();
-        } catch (SQLException e) {
+
+        List users = null;
+        User user = null;
+
+        Transaction tx = null;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+            tx = session.beginTransaction();
+
+            String hql = "FROM User u WHERE u.email = :email";
+            Query query = session.createQuery(hql);
+            query.setParameter("email", email);
+            users = query.list();
+
+
+            System.out.println(users.toString());
+
+            if(!users.isEmpty())
+                user = (User) users.get(0);
+
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
             e.printStackTrace();
+        } finally {
+            session.close();
         }
-        return user;
+
+        if(user != null) {
+            return Optional.of(user);
+        }
+        else{
+            return Optional.empty();
+        }
+
     }
 
     public Optional<User> getAUserByUsername(String userName) {
-        Optional<User> user = Optional.empty();
-        try (Connection conn = ConnectionFactory.getInstance().getConnection()){
-            String sql = baseQuery + "WHERE username = ?";
-            PreparedStatement psmt = conn.prepareStatement(sql);
-            psmt.setString(1,userName);
-            ResultSet rs = psmt.executeQuery();
-            user = mapResultSet(rs).stream().findFirst();
-        } catch (SQLException sqle) {
-            sqle.printStackTrace();
+
+        List users = null;
+        User user = null;
+
+        Transaction tx = null;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+            tx = session.beginTransaction();
+
+            String hql = "FROM User u WHERE u.username = :username";
+            Query query = session.createQuery(hql);
+            query.setParameter("username", userName);
+            users = query.list();
+
+
+            System.out.println(users.toString());
+
+            if(!users.isEmpty())
+                user = (User) users.get(0);
+
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
-        System.out.println(user);
-        return user;
+
+        if(user != null) {
+            return Optional.of(user);
+        }
+        else{
+            return Optional.empty();
+
+        }
     }
 
     /**
      * A method to get a single user by a given username and password
+
      * @param userName the users username
      * @param password the users password
      * @return returns an optional user
      * @throws SQLException e
      */
+
     public Optional<User> getAUserByUsernameAndPassword(String userName, String password) {
+
+//        if (password.charAt(0) != '$') {
+//            try {
+//                password = hashPass(password);
+//            } catch (NoSuchAlgorithmException e) {
+//                e.printStackTrace();
+//            } catch (InvalidKeySpecException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
         Optional<User> user = Optional.empty();
-        try (Connection conn = ConnectionFactory.getInstance().getConnection()){
-            String sql = baseQuery + "WHERE username = ? AND  password = project_1.crypt(?, password)";
-            PreparedStatement psmt = conn.prepareStatement(sql);
-            psmt.setString(1,userName);
-            psmt.setString(2,password);
-            ResultSet rs = psmt.executeQuery();
-            user = mapResultSet(rs).stream().findFirst();
-        } catch (SQLException sqle) {
-            sqle.printStackTrace();
+
+        Transaction tx = null;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+
+            tx = session.beginTransaction();
+            user = session.createQuery("FROM User u where u.username = :username AND u.password = :password")
+                    .setParameter("username", userName).setParameter("password", password).stream().findFirst();
+
+            tx.commit();
+
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+
         }
-        System.out.println(user);
+
         return user;
+
     }
 
     //---------------------------------- UPDATE -------------------------------------------- //
 
     public boolean updateAUser(User newUser) {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                    "SET first_name=?, last_name=?, email=?, user_role_id=?, username=?, password= project_1.crypt(?, project_1.gen_salt('bf', 10))\n" +
-                    "WHERE id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1,newUser.getFirstname());
-            ps.setString(2,newUser.getLastname());
-            ps.setString(3,newUser.getEmail());
-            ps.setInt(4,newUser.getUserRole());
-            ps.setString(5,newUser.getUsername());
-            ps.setString(6, newUser.getPassword());
-            ps.setInt(7,newUser.getUserId());
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
-        } catch (SQLException e) {
+
+
+        boolean result= false;
+
+        Transaction tx = null;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        try {
+
+            tx = session.beginTransaction();
+
+            session.update(newUser);
+            result = true;
+
+            tx.commit();
+
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
             e.printStackTrace();
+        } finally {
+            session.close();
         }
-        return false;
+
+        return result;
+
     }
 
     //---------------------------------- DELETE -------------------------------------------- //
@@ -149,46 +273,50 @@ public class UserRepository {
      * @throws SQLException
      */
     public boolean deleteAUserById(Integer userId) {
+
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        boolean deleted = false;
+
+        try {
+            tx = session.beginTransaction();
+            User user = (User) session.get(User.class, userId);
+            session.delete(user);
+            deleted = true;
+            tx.commit();
+        }catch (HibernateException e) {
+            if(tx != null) tx.rollback();
+            e.printStackTrace();
+        }finally {
+            session.close();
+        }
+
+        return deleted;
+    }
+
+    /**
+     * A method to delete a single User from the database
+     * @param username string of username you are trying to delete
+     * @return returns true if one and only one record is updated
+     * @throws SQLException
+     */
+    public boolean deleteByUsername(String username) {
         try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = baseUpdate +
-                         "SET user_role_id=4\n" +
-                         "WHERE id=? ";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, userId);
+            String deleteSql = "DELETE FROM " +
+                    "project_1.ers_users where username=?";
+
+            PreparedStatement ps = conn.prepareStatement(deleteSql);
+            ps.setString(1, username);
             //get the number of affected rows
+            System.out.println("[INFO] UserRepository.deleteAUserById - prepared statement: " + ps.toString());
             int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+            return rowsInserted == 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-
-
-    //---------------------------------- UTIL -------------------------------------------- //
-
-    /**
-     * A method to map the result sets from the users queries
-     * @param rs a result set
-     * @return a set of users
-     * @throws SQLException e
-     */
-    private List<User> mapResultSet(ResultSet rs) throws SQLException {
-        List<User> users = new ArrayList<>();
-        while (rs.next()){
-            User temp = new User();
-            temp.setUserId(rs.getInt("id"));
-            temp.setUsername(rs.getString("username"));
-            temp.setPassword(rs.getString("password"));
-            temp.setEmail(rs.getString("email"));
-            temp.setFirstname(rs.getString("first_name"));
-            temp.setLastname(rs.getString("last_name"));
-            temp.setUserRole(rs.getInt("user_role_id"));
-            users.add(temp);
-        }
-        return users;
-    }
 
 
 }

@@ -1,5 +1,11 @@
 package com.revature.models;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+//@Entity
+//@Table(name = "ers_reimbursement_types")
 public enum ReimbursementType {
     // values declared within enums are constants and are comma separated
     LODGING("Lodging"),
@@ -7,6 +13,7 @@ public enum ReimbursementType {
     FOOD("Food"),
     OTHER("Other");
 
+//    @Column(name = "reimb_type")
     private String reimbursementType;
 
     // enum constructors are implicitly private
