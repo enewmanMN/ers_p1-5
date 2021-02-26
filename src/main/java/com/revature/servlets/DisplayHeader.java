@@ -1,69 +1,53 @@
 package com.revature.servlets;
 
+import com.revature.models.User;
+import com.revature.services.UserService;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 
+@WebServlet(name="/Login", urlPatterns = "/Login")
 public class DisplayHeader extends HttpServlet {
     // Method to handle GET method request.
     // Carries request parameters in appended url string so less secure
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        UserService userService = new UserService();
         // Set response content type
         response.setContentType("text/html");
 
         PrintWriter out = response.getWriter();
-        String title = "Reading All Form Parameters";
-        String docType =
-                "<!doctype html public \"-//w3c//dtd html 4.0 " + "transitional//en\">\n";
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
 
-        out.println(docType +
-                "<html>\n" +
-                "<head><title>" + title + "</title></head>\n" +
-                "<body bgcolor = \"#f0f0f0\">\n" +
-                "<h1 align = \"center\">" + title + "</h1>\n" +
-                "<table width = \"100%\" border = \"1\" align = \"center\">\n" +
-                "<tr bgcolor = \"#949494\">\n" +
-                "<th>Param Name</th>" +
-                "<th>Param Value(s)</th>\n"+
-                "</tr>\n"
-        );
+        User user = userService.authenticate(username, password);
 
-        Enumeration paramNames = request.getParameterNames();
+        if (userService.isUserValid(user)) {
+            out.write("<h1>/Login credentials valid</h1>");
+            HttpSession session = request.getSession();
+            session.setAttribute( "id", user.getUserId());
+            session.setAttribute("username", user.getUsername());
+            session.setAttribute("name", user.getFirstname());
+            session.setAttribute("email", user.getEmail());
+            session.setAttribute("role", user.getUserRole());
 
-        while(paramNames.hasMoreElements()) {
-            String paramName = (String)paramNames.nextElement();
-            out.print("<tr><td>" + paramName + "</td>\n<td>");
-            String[] paramValues = request.getParameterValues(paramName);
-
-            // Read single valued data
-            if (paramValues.length == 1) {
-                String paramValue = paramValues[0];
-                if (paramValue.length() == 0)
-                    out.println("<i>No Value</i>");
-                else
-                    out.println(paramValue);
-            } else {
-                // Read multiple valued data
-                out.println("<ul>");
-
-                for(int i = 0; i < paramValues.length; i++) {
-                    out.println("<li>" + paramValues[i]);
-                }
-                out.println("</ul>");
-            }
+            out.println("<h1> Welcome " + session.getAttribute( "name"));
         }
-        out.println("</tr>\n</table>\n" +
-                "<form action = \"read\" method = \"POST\">\n" +
-                "    Username: <input type = \"text\" name = \"first_name\">\n" +
-                "    <br />\n" +
-                "    Password: <input type = \"text\" name = \"last_name\" />\n" +
-                "    <input type = \"submit\" value = \"Submit\" />\n" +
-                "</form></body></html>");
+        else
+        {
+            out.println("Username or Password incorrect");
+            RequestDispatcher rs = request.getRequestDispatcher("/Login");
+            rs.include(request, response);
+        }
+
     }
 }

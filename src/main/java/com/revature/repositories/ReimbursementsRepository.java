@@ -58,16 +58,14 @@ public class ReimbursementsRepository {
             session.save(reimbursement);
 
             tx.commit();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (tx!=null) tx.rollback();
             throw e;
-        }
-        finally {
+        } finally {
             session.close();
+            return true;
         }
 
-        return false;
     }
 
     //---------------------------------- READ -------------------------------------------- //
@@ -195,31 +193,42 @@ public class ReimbursementsRepository {
      */
     public List<Reimbursement> getAllReimbSetByAuthorId(Integer authorId){
 
-        List reimb = null;
-        Transaction tx = null;
+        List<Reimbursement> returnList = getAllReimbursements();
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        for (Reimbursement reim : returnList) {
+            if (reim.getAuthorId().getUserId() == authorId) {
 
-        try {
-            tx = session.beginTransaction();
-
-            String hql = "FROM Reimbursement r WHERE r.authorId = :authorId";
-            Query query = session.createQuery(hql);
-            query.setParameter("authorId", authorId);
-            reimb = query.list();
-
-
-            System.out.println(reimb.toString());
-
-
-        }catch (HibernateException e) {
-            if(tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
+            } else {
+                returnList.remove(this);
+            }
         }
+        return returnList;
 
-        return reimb;
+
+//        List reimb = null;
+//        Transaction tx = null;
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//
+//        try {
+//            tx = session.beginTransaction();
+//
+//            String hql = "FROM Reimbursement r WHERE r.authorId = :authorId";
+//            Query query = session.createQuery(hql);
+//            query.setParameter("authorId", authorId);
+//            reimb = query.list();
+//
+//
+//            System.out.println(reimb.toString());
+//
+//
+//        }catch (HibernateException e) {
+//            if(tx != null) tx.rollback();
+//            e.printStackTrace();
+//        } finally {
+//            session.close();
+//        }
+//
+//        return reimb;
     }
 
     /**
@@ -291,25 +300,37 @@ public class ReimbursementsRepository {
     @SuppressWarnings("unchecked")
     public List<Reimbursement> getAllReimbSetByType(Integer typeId)  {
 
-        List<Reimbursement> reimbursements = null;
 
-        Transaction tx = null;
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Reimbursement> returnList = getAllReimbursements();
 
-        try{
-            tx = session.beginTransaction();
-            String hql = "FROM Reimbursement r where r.reimbursementType = :reimbursement_type_id";
-            reimbursements = session.createQuery(hql)
-                    .setParameter("reimbursement_type_id", typeId)
-                    .list();
-        } catch (HibernateException e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
+        for (Reimbursement reim : returnList) {
+            if (reim.getReimbursementType().ordinal() == typeId) {
+
+            } else {
+                returnList.remove(this);
+            }
         }
+        return returnList;
 
-        return reimbursements;
+//        List<Reimbursement> reimbursements = null;
+//
+//        Transaction tx = null;
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//
+//        try{
+//            tx = session.beginTransaction();
+//            String hql = "FROM Reimbursement r where r.reimbursementType = :reimbursement_type_id";
+//            reimbursements = session.createQuery(hql)
+//                    .setParameter("reimbursement_type_id", typeId)
+//                    .list();
+//        } catch (HibernateException e) {
+//            if (tx != null) tx.rollback();
+//            e.printStackTrace();
+//        } finally {
+//            session.close();
+//        }
+//
+//        return reimbursements;
     }
 
     /**
@@ -564,18 +585,23 @@ public class ReimbursementsRepository {
      * @throws SQLException e
      */
     public boolean delete(Integer reimbId) throws SQLException {
-        try(Connection conn = ConnectionFactory.getInstance().getConnection()) {
-            String sql = "DELETE FROM project_1.ers_reimbursements\n" +
-                         "WHERE id=? ";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1,reimbId);
-            //get the number of affected rows
-            int rowsInserted = ps.executeUpdate();
-            return rowsInserted != 0;
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Reimbursement reimbursement;
+
+        try{
+            tx = session.beginTransaction();
+            reimbursement = (Reimbursement) session.load(Reimbursement.class, reimbId);
+            session.delete(reimbursement);
+            tx.commit();
+            return true;
+        } catch (HibernateException e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            session.close();
         }
-
-
-
     }
 
     //---------------------------------- UTIL -------------------------------------------- //

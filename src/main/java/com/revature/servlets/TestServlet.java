@@ -5,15 +5,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
 public class TestServlet extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+    // Method to handle GET method request.
+    // Carries request parameters in appended url string so less secure
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        PrintWriter out = response.getWriter();
 
-
-        resp.getWriter().write("<h1>/test works!</h1>");
     }
 
 }
