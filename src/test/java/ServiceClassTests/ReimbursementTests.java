@@ -79,7 +79,7 @@ public class ReimbursementTests {
         reim2.setSubmitted(new Timestamp(System.currentTimeMillis()));//
         reim2.setReceipt(null);//
 
-        reimbService = new ReimbursementService();
+        reimbService = ReimbursementService.getInstance();
         repo = new ReimbursementsRepository();
     }
 

@@ -14,7 +14,16 @@ import java.util.List;
  * Service layer for validating reimbursements before sending to or from the Database
  */
 public class ReimbursementService {
-    private final ReimbursementsRepository reimbRepo = new ReimbursementsRepository();
+    private static final ReimbursementService reimbursementService = new ReimbursementService(ReimbursementsRepository.getInstance());
+
+    private ReimbursementsRepository reimbRepo = new ReimbursementsRepository();
+
+    private ReimbursementService(ReimbursementsRepository reimbursementsRepository){
+        super();
+        this.reimbRepo = reimbursementsRepository;
+    }
+
+    public static ReimbursementService getInstance() {return reimbursementService;};
 
     /**
      * Gets all Reimbursements from the DataBase

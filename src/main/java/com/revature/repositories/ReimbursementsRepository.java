@@ -24,6 +24,12 @@ import java.util.*;
  * A class to interact with the database to CRUD reimbursement objects
  */
 public class ReimbursementsRepository {
+
+    private static final ReimbursementsRepository reimbursementsRepository = new ReimbursementsRepository();
+    public static ReimbursementsRepository getInstance() {
+        return reimbursementsRepository;
+    }
+
     //base query that combines the name and resolver names from one query
     private String baseQuery = "SELECT er.id, er.amount, er.description, er.reimbursement_status_id, \n" +
             "er.reimbursement_type_id, er.resolved, er.submitted,  er.author_id , er.resolver_id,\n" +
@@ -207,30 +213,25 @@ public class ReimbursementsRepository {
         return returnList;
 
 
-//        List reimb = null;
+//        List<Reimbursement> reimbursements = null;
 //        Transaction tx = null;
 //        Session session = HibernateUtil.getSessionFactory().openSession();
 //
 //        try {
 //            tx = session.beginTransaction();
+//            String hql = "FROM Reimbursement r where r.authorId = :authorId";
+//            reimbursements = session.createQuery(hql)
+//                    .setParameter("authorId", authorId)
+//                    .list();
 //
-//            String hql = "FROM Reimbursement r WHERE r.authorId = :authorId";
-//            Query query = session.createQuery(hql);
-//            query.setParameter("authorId", authorId);
-//            reimb = query.list();
+//        } catch (HibernateException e) {
+//            if (tx!= null) tx.rollback();
 //
-//
-//            System.out.println(reimb.toString());
-//
-//
-//        }catch (HibernateException e) {
-//            if(tx != null) tx.rollback();
-//            e.printStackTrace();
 //        } finally {
 //            session.close();
 //        }
 //
-//        return reimb;
+//        return reimbursements;
 
     }
 

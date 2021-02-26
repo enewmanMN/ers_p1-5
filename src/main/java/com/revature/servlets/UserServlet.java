@@ -8,6 +8,7 @@ import com.revature.models.User;
 import com.revature.repositories.UserRepository;
 import com.revature.services.ReimbursementService;
 import com.revature.services.UserService;
+import com.sun.xml.bind.v2.TODO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,8 +28,6 @@ public class UserServlet extends HttpServlet {
     private final UserService USER_SERVICE = UserService.getInstance();
     private final UserRepository USER_REPO = UserRepository.getInstance();
 
-    ReimbursementService reimbursementService = new ReimbursementService();
-
     /**
      * Method for posting a new user when an admin hits this endpoint and calls a post
      * @param request
@@ -47,8 +46,15 @@ public class UserServlet extends HttpServlet {
 
         //admin
         try {
+            out.write("<p>im in creating post</p>");
+            out.write("Role here with name: " + rqstr.getUsername() +" "+ rqstr.getUserRole());
             if (rqstr.getUserRole() == 1) {
+                out.write("<p>im here</p>");
+
                 User newUser = mapper.readValue(request.getInputStream(), User.class);
+
+                out.write(newUser.toString());
+
                 LOG.info("Adding new user, {}", newUser.toString());
                 USER_SERVICE.register(newUser);
 
@@ -118,12 +124,9 @@ public class UserServlet extends HttpServlet {
                 User deleteUser = mapper.readValue(request.getInputStream(), User.class);
                 LOG.info("Deleting user, {}", deleteUser.toString());
 
+                int deletedUserId = deleteUser.getUserId();
 
-
-                boolean user = UserService.getInstance().deleteUserById(deleteUser.getUserId());
-
-                out.write(mapper.writeValueAsString(user));
-
+                USER_SERVICE.deleteUserById(deletedUserId);
 
                 response.setStatus(200);
             }
@@ -155,6 +158,9 @@ public class UserServlet extends HttpServlet {
 
             try {
                 if (rqstr.getUserRole() == 1) {
+
+                    // TODO: 2/26/2021  add a get all user
+
                     User getUser = mapper.readValue(request.getInputStream(), User.class);
                     LOG.info("Getting user, {}", getUser.toString());
 

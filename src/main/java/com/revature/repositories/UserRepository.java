@@ -42,13 +42,13 @@ public class UserRepository {
      */
     public boolean addUser(User newUser)  {
 
-        try {
-            hashPass(newUser);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            hashPass(newUser);
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        } catch (InvalidKeySpecException e) {
+//            e.printStackTrace();
+//        }
 
         boolean result= false;
 
@@ -65,18 +65,18 @@ public class UserRepository {
         return false;
     }
 
-    public String hashPass(String originalPassword) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
-        return bcryptHashString;
-    }
-
-    public void hashPass(User user) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-        String originalPassword = user.getPassword();
-        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
-        user.setPassword(bcryptHashString);
-    }
+//    public String hashPass(String originalPassword) throws NoSuchAlgorithmException, InvalidKeySpecException
+//    {
+//        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
+//        return bcryptHashString;
+//    }
+//
+//    public void hashPass(User user) throws NoSuchAlgorithmException, InvalidKeySpecException
+//    {
+//        String originalPassword = user.getPassword();
+//        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
+//        user.setPassword(bcryptHashString);
+//    }
 
     //---------------------------------- READ -------------------------------------------- //
 
@@ -197,38 +197,29 @@ public class UserRepository {
 
     public Optional<User> getAUserByUsernameAndPassword(String userName, String password) {
 
-        if (password.charAt(0) != '$') {
-            try {
-                password = hashPass(password);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (InvalidKeySpecException e) {
-                e.printStackTrace();
-            }
-        }
+//        if (password.charAt(0) != '$') {
+//            try {
+//                password = hashPass(password);
+//            } catch (NoSuchAlgorithmException e) {
+//                e.printStackTrace();
+//            } catch (InvalidKeySpecException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
-        List users = null;
-        User user = null;
+        Optional<User> user = Optional.empty();
 
         Transaction tx = null;
 
         Session session = HibernateUtil.getSessionFactory().openSession();
 
         try {
+
             tx = session.beginTransaction();
+            user = session.createQuery("FROM User u where u.username = :username AND u.password = :password")
+                    .setParameter("username", userName).setParameter("password", password).stream().findFirst();
 
-
-            String hql = "FROM User u WHERE u.username = :username AND u.password = :password";
-            Query query = session.createQuery(hql);
-            query.setParameter("username", userName);
-            query.setParameter("password", password);
-            users = query.list();
-
-
-            System.out.println(users.toString());
-
-            if(!users.isEmpty())
-                user = (User) users.get(0);
+            tx.commit();
 
         }catch (HibernateException e) {
             if(tx != null) tx.rollback();
@@ -238,12 +229,7 @@ public class UserRepository {
 
         }
 
-        if(user != null) {
-            return Optional.of(user);
-        }
-        else{
-            return Optional.empty();
-        }
+        return user;
 
     }
 
