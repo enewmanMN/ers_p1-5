@@ -48,7 +48,7 @@ public class Reimbursement {
     private User authorId;
 
     @ManyToOne(targetEntity = User.class)
-    @JoinColumn(name = "resolver_id", insertable = false, updatable = false)
+    @JoinColumn(name = "resolver_id", insertable = false)
     private User resolverId;
 
 //    @ManyToOne(targetEntity = User.class)

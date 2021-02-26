@@ -40,9 +40,9 @@
             <AppenderRef ref="File"/>
         </Logger>
 
-        <Root level="trace">
-            <AppenderRef ref="STDOUT"/>
-        </Root>
+<!--        <Root level="trace">-->
+<!--            <AppenderRef ref="STDOUT"/>-->
+<!--        </Root>-->
     </Loggers>
 
 </Configuration>

@@ -1,5 +1,6 @@
 package com.revature.repositories;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.revature.models.User;
 import com.revature.util.ConnectionFactory;
 import com.revature.util.HibernateUtil;
@@ -8,6 +9,10 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.*;
 
@@ -37,6 +42,14 @@ public class UserRepository {
      */
     public boolean addUser(User newUser)  {
 
+        try {
+            hashPass(newUser);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+
         boolean result= false;
 
         Transaction tx = null;
@@ -50,6 +63,19 @@ public class UserRepository {
         session.close();
 
         return false;
+    }
+
+    public String hashPass(String originalPassword) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
+        return bcryptHashString;
+    }
+
+    public void hashPass(User user) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+        String originalPassword = user.getPassword();
+        String bcryptHashString = BCrypt.withDefaults().hashToString(12, originalPassword.toCharArray());
+        user.setPassword(bcryptHashString);
     }
 
     //---------------------------------- READ -------------------------------------------- //
@@ -170,6 +196,17 @@ public class UserRepository {
      */
 
     public Optional<User> getAUserByUsernameAndPassword(String userName, String password) {
+
+        if (password.charAt(0) != '$') {
+            try {
+                password = hashPass(password);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (InvalidKeySpecException e) {
+                e.printStackTrace();
+            }
+        }
+
         List users = null;
         User user = null;
 

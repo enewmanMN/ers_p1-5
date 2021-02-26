@@ -1,8 +1,8 @@
 package com.revature.exceptions;
 
-public class QuizzardException extends RuntimeException {
+public class ersSystemException extends RuntimeException {
 
-    public QuizzardException(Throwable e) {
+    public ersSystemException(Throwable e) {
         super("An unspecified exception was thrown, see logs for more information", e);
     }
 
