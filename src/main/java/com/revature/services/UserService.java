@@ -94,10 +94,10 @@ public class UserService {
      */
     public User getByUsername(String username) {
         if (username == null || username.trim().equals("") ){
-            throw new RuntimeException("Invalid credentials provided");
+            throw new InvalidRequestException("Invalid credentials provided");
         }
         return userRepo.getAUserByUsername(username)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(InvalidRequestException::new);
     }
 
     /**
